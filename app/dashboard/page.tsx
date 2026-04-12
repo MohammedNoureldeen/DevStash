@@ -1,9 +1,10 @@
 import DashboardShell from '@/src/components/dashboard/DashboardShell'
+import MainContent from '@/src/components/dashboard/MainContent'
 
 export default function DashboardPage() {
   return (
     <DashboardShell>
-      <h2 className="text-lg font-semibold">Main</h2>
+      <MainContent />
     </DashboardShell>
   )
 }
