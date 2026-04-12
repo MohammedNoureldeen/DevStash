@@ -3,7 +3,7 @@
 export const mockUser = {
   id: "user_1",
   name: "John Doe",
-  email: "john@example.com",
+  email: "john@devstash.demo",
   image: null,
   isPro: false,
 };
