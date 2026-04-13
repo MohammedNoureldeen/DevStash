@@ -1,15 +1,16 @@
 import {
   Code, Sparkles, StickyNote, Terminal,
   Link as LinkIcon, File, Image,
-  Star, Pin, Clock, FolderOpen,
-  Layers, BookMarked,
+  Star, Pin, Clock,
+  Layers, BookMarked, FolderOpen,
 } from 'lucide-react'
 import {
-  mockCollections,
   mockItems,
   mockItemTypes,
   mockItemTypeCounts,
 } from '@/src/lib/mock-data'
+import type { CollectionWithDetails } from '@/src/lib/db/collections'
+import CollectionCard from './CollectionCard'
 
 // ── Icon map ───────────────────────────────────────────────────────────────
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -24,15 +25,10 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 // ── Derived data ───────────────────────────────────────────────────────────
 const totalItems = Object.values(mockItemTypeCounts).reduce((a, b) => a + b, 0)
-const totalCollections = mockCollections.length
+
 const favoriteItemsCount = mockItems.filter(i => i.isFavorite).length
-const favoriteCollectionsCount = mockCollections.filter(c => c.isFavorite).length
 
 const pinnedItems = mockItems.filter(i => i.isPinned)
-
-const recentCollections = [...mockCollections]
-  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  .slice(0, 4)
 
 const recentItems = [...mockItems]
   .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -109,24 +105,6 @@ function PinnedItemCard({ item }: { item: typeof mockItems[number] }) {
   )
 }
 
-function RecentCollectionCard({ col }: { col: typeof mockCollections[number] }) {
-  return (
-    <div className="rounded-lg border border-border bg-card p-4 flex flex-col gap-1.5 hover:border-border/80 transition-colors cursor-pointer">
-      <div className="flex items-center gap-2">
-        <FolderOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <span className="text-sm font-medium text-foreground truncate">{col.name}</span>
-        {col.isFavorite && <Star className="h-3 w-3 shrink-0 text-yellow-500 ml-auto" />}
-      </div>
-      {col.description && (
-        <p className="text-xs text-muted-foreground line-clamp-1">{col.description}</p>
-      )}
-      <p className="text-xs text-muted-foreground mt-auto">
-        {col.itemCount} {col.itemCount === 1 ? 'item' : 'items'}
-      </p>
-    </div>
-  )
-}
-
 function RecentItemRow({ item }: { item: typeof mockItems[number] }) {
   const type = getItemType(item.itemTypeId)
   const Icon = type ? (ICON_MAP[type.icon] ?? File) : File
@@ -162,52 +140,52 @@ function RecentItemRow({ item }: { item: typeof mockItems[number] }) {
 }
 
 // ── Main export ────────────────────────────────────────────────────────────
-export default function MainContent() {
+export default function MainContent({ collections }: { collections: CollectionWithDetails[] }) {
   return (
     <div className="flex flex-col gap-6">
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Items" value={totalItems} icon={Layers} color="#3b82f6" />
-        <StatCard label="Collections" value={totalCollections} icon={FolderOpen} color="#8b5cf6" />
+        <StatCard label="Collections" value={collections.length} icon={FolderOpen} color="#8b5cf6" />
         <StatCard label="Favorite Items" value={favoriteItemsCount} icon={Star} color="#f59e0b" />
-        <StatCard label="Favorite Collections" value={favoriteCollectionsCount} icon={BookMarked} color="#10b981" />
+        <StatCard label="Favorite Collections" value={collections.filter(c => c.isFavorite).length} icon={BookMarked} color="#10b981" />
       </div>
 
-      {/* Pinned + Recent Collections */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Pinned Items */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Pin className="h-4 w-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">Pinned Items</h2>
+      {/* Collections Section */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <FolderOpen className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-foreground">Collections</h2>
           </div>
-          {pinnedItems.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              {pinnedItems.map(item => (
-                <PinnedItemCard key={item.id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No pinned items.</p>
-          )}
-        </section>
+          <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            View all
+          </button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {collections.map(col => (
+            <CollectionCard key={col.id} collection={col} />
+          ))}
+        </div>
+      </section>
 
-        {/* Recent Collections */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">Recent Collections</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {recentCollections.map(col => (
-              <RecentCollectionCard key={col.id} col={col} />
+      {/* Pinned Items */}
+      <section>
+        <div className="flex items-center gap-2 mb-3">
+          <Pin className="h-4 w-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold text-foreground">Pinned Items</h2>
+        </div>
+        {pinnedItems.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {pinnedItems.map(item => (
+              <PinnedItemCard key={item.id} item={item} />
             ))}
           </div>
-        </section>
-
-      </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No pinned items.</p>
+        )}
+      </section>
 
       {/* Recent Items */}
       <section>

@@ -1,6 +1,6 @@
 # Current Feature
 
-Database Seed Setup
+Dashboard Collections
 
 ## Status
 
@@ -10,22 +10,22 @@ In Progress
 
 ## Goals
 
-- Create `prisma/seed.ts` script to populate database with sample data
-- Seed a demo user (demo@devstash.io) with hashed password
-- Seed 7 system item types (snippet, prompt, command, note, file, image, link)
-- Seed 5 collections with 18 total items (React Patterns, AI Workflows, DevOps, Terminal Commands, Design Resources)
-- Use `upsert` to allow re-running seed without duplicates
-- Add seed script reference to `package.json`
+- Create src/lib/db/collections.ts with data fetching functions
+- Fetch collections directly in server component
+- Collection card border color derived from most-used content type in that collection
+- Show small icons of all types in that collection
+- Keep the current design. You can also reference the screenshot
+- Update collection stats display
 
 ## Notes
 
-See full spec at `context/features/seed-spec.md`.
+See full spec at `context/features/dashboard-collections-spec.md`.
 
 Key constraints:
-- Password must be hashed with bcryptjs (12 rounds)
-- All item types have `isSystem: true`
-- Links should use real URLs (Tailwind, ShadCN, Material Design, Lucide, Docker, GitHub Actions)
-- Code snippets should be realistic and useful TypeScript/shell code
+- Replace dummy collection data in main dashboard area with actual database data
+- Use Prisma to fetch from Neon database
+- Do not add items underneath yet - that will be done later
+- Reference `context/screenshots/dashboard-ui-main.png` for layout/design
 
 ## History
 
