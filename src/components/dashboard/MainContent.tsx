@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import {
   Code, Sparkles, StickyNote, Terminal,
   Link as LinkIcon, File, Image,
@@ -146,15 +147,18 @@ export default function MainContent({
             <FolderOpen className="h-4 w-4 text-muted-foreground" />
             <h2 className="text-sm font-semibold text-foreground">Collections</h2>
           </div>
-          <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/collections" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
             View all
-          </button>
+          </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {collections.map(col => (
             <CollectionCard key={col.id} collection={col} />
           ))}
         </div>
+        <Link href="/collections" className="mt-2 block text-xs text-muted-foreground hover:text-foreground transition-colors text-center">
+          View all collections
+        </Link>
       </section>
 
       {/* Pinned Items — hidden when none exist */}

@@ -8,13 +8,10 @@ import {
   X, FolderOpen,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import {
-  mockItemTypes,
-  mockItemTypeCounts,
-  mockCollections,
-  mockUser,
-} from '@/src/lib/mock-data'
+import { mockUser } from '@/src/lib/mock-data'
 import { Button } from '@/components/ui/button'
+import type { ItemTypeWithCount } from '@/src/lib/db/items'
+import type { FavoriteCollection, CollectionWithDetails } from '@/src/lib/db/collections'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Code,
@@ -36,20 +33,24 @@ const PLURAL_MAP: Record<string, string> = {
   image: 'images',
 }
 
+export type SidebarData = {
+  itemTypes: ItemTypeWithCount[]
+  favoriteCollections: FavoriteCollection[]
+  recentCollections: CollectionWithDetails[]
+}
+
 interface SidebarContentProps {
   collapsed: boolean
   onToggle: () => void
   onClose?: () => void
   isMobile?: boolean
+  sidebarData: SidebarData
 }
 
-function SidebarContent({ collapsed, onToggle, onClose, isMobile = false }: SidebarContentProps) {
+function SidebarContent({ collapsed, onToggle, onClose, isMobile = false, sidebarData }: SidebarContentProps) {
   const show = !collapsed || isMobile
 
-  const favoriteCollections = mockCollections.filter(c => c.isFavorite)
-  const recentCollections = [...mockCollections]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 3)
+  const { itemTypes, favoriteCollections, recentCollections } = sidebarData
 
   const userInitials = mockUser.name
     .split(' ')
@@ -106,10 +107,9 @@ function SidebarContent({ collapsed, onToggle, onClose, isMobile = false }: Side
               Items
             </p>
           )}
-          {mockItemTypes.map((type) => {
+          {itemTypes.map((type) => {
             const Icon = ICON_MAP[type.icon] ?? File
             const slug = PLURAL_MAP[type.name] ?? `${type.name}s`
-            const count = mockItemTypeCounts[type.name] ?? 0
 
             return (
               <Link
@@ -127,7 +127,7 @@ function SidebarContent({ collapsed, onToggle, onClose, isMobile = false }: Side
                 {show && (
                   <>
                     <span className="flex-1 capitalize">{type.name}s</span>
-                    <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
+                    <span className="text-xs text-muted-foreground tabular-nums">{type.count}</span>
                   </>
                 )}
               </Link>
@@ -177,10 +177,21 @@ function SidebarContent({ collapsed, onToggle, onClose, isMobile = false }: Side
               href={`/collections/${col.id}`}
               className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
-              <FolderOpen className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <span
+                className="h-3.5 w-3.5 rounded-full shrink-0"
+                style={{ backgroundColor: col.borderColor }}
+              />
               <span className="truncate">{col.name}</span>
             </Link>
           ))}
+          {show && (
+            <Link
+              href="/collections"
+              className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors mt-1"
+            >
+              View all collections
+            </Link>
+          )}
         </nav>
 
       </div>
@@ -213,9 +224,10 @@ interface SidebarProps {
   mobileOpen: boolean
   onToggle: () => void
   onMobileClose: () => void
+  sidebarData: SidebarData
 }
 
-export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose }: SidebarProps) {
+export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose, sidebarData }: SidebarProps) {
   return (
     <>
       {/* Mobile backdrop */}
@@ -241,6 +253,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
           onToggle={onToggle}
           onClose={onMobileClose}
           isMobile
+          sidebarData={sidebarData}
         />
       </aside>
 
@@ -253,7 +266,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
           collapsed ? 'w-14' : 'w-60',
         )}
       >
-        <SidebarContent collapsed={collapsed} onToggle={onToggle} />
+        <SidebarContent collapsed={collapsed} onToggle={onToggle} sidebarData={sidebarData} />
       </aside>
     </>
   )
