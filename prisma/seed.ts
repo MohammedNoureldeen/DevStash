@@ -1,7 +1,10 @@
-import { PrismaClient, ContentType } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient, ContentType } from '../generated/prisma/client';
+import type { Item } from '../generated/prisma/client';
 import { hash } from 'bcryptjs';
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🌱 Starting seed...');
@@ -34,13 +37,11 @@ async function main() {
 
   const createdItemTypes: Record<string, { id: string }> = {};
   for (const itemType of systemItemTypes) {
-    const created = await prisma.itemType.upsert({
-      where: { name: itemType.name },
-      update: {},
-      create: {
-        ...itemType,
-        isSystem: true,
-      },
+    const existing = await prisma.itemType.findFirst({
+      where: { name: itemType.name, isSystem: true },
+    });
+    const created = existing ?? await prisma.itemType.create({
+      data: { ...itemType, isSystem: true },
     });
     createdItemTypes[itemType.name] = created;
     console.log(`✅ ItemType: ${itemType.name}`);
@@ -184,7 +185,7 @@ export function generateId() {
   ]);
 
   await prisma.itemCollection.createMany({
-    data: reactItems.map((item) => ({
+    data: reactItems.map((item: Item) => ({
       itemId: item.id,
       collectionId: reactPatterns.id,
     })),
@@ -271,7 +272,7 @@ Code to refactor:
   ]);
 
   await prisma.itemCollection.createMany({
-    data: aiItems.map((item) => ({
+    data: aiItems.map((item: Item) => ({
       itemId: item.id,
       collectionId: aiWorkflows.id,
     })),
@@ -363,7 +364,7 @@ docker compose logs -f app`,
   ]);
 
   await prisma.itemCollection.createMany({
-    data: devOpsItems.map((item) => ({
+    data: devOpsItems.map((item: Item) => ({
       itemId: item.id,
       collectionId: devOps.id,
     })),
@@ -464,7 +465,7 @@ npm why <package-name>`,
   ]);
 
   await prisma.itemCollection.createMany({
-    data: terminalItems.map((item) => ({
+    data: terminalItems.map((item: Item) => ({
       itemId: item.id,
       collectionId: terminalCommands.id,
     })),
@@ -521,7 +522,7 @@ npm why <package-name>`,
   ]);
 
   await prisma.itemCollection.createMany({
-    data: designItems.map((item) => ({
+    data: designItems.map((item: Item) => ({
       itemId: item.id,
       collectionId: designResources.id,
     })),
