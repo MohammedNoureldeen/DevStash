@@ -1,14 +1,57 @@
 # Current Feature
 
-Add Pro Badge to Sidebar
+Auth Setup - NextAuth + GitHub Provider
 
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-Completed
+In Progress
 
 ## Goals
+
+- Install NextAuth v5 (`next-auth@beta`) and `@auth/prisma-adapter`
+- Set up split auth config pattern for edge compatibility
+- Add GitHub OAuth provider
+- Protect `/dashboard/*` routes using Next.js 16 proxy
+- Redirect unauthenticated users to sign-in
+
+## Notes
+
+See full spec at `context/features/auth-spec-files/auth-phase-1-spec.md`.
+
+Files to create:
+1. `src/auth.config.ts` — edge-compatible config (providers only, no adapter)
+2. `src/auth.ts` — full config with Prisma adapter and JWT strategy
+3. `src/app/api/auth/[...nextauth]/route.ts` — export handlers from auth.ts
+4. `src/proxy.ts` — route protection with redirect logic
+5. `src/types/next-auth.d.ts` — extend Session type with user.id
+
+Key constraints:
+- Use `next-auth@beta` (not `@latest`)
+- Proxy file must be at `src/proxy.ts` (same level as `app/`)
+- Use named export: `export const proxy = auth(...)` not default export
+- Use `session: { strategy: 'jwt' }` with split config pattern
+- Don't set custom `pages.signIn` — use NextAuth's default page
+
+Env vars needed: `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`
+
+## History
+
+<!-- Keep this updated. Earliest to latest -->
+
+- **2026-04-19** — Loaded spec from `context/features/auth-spec-files/auth-phase-1-spec.md`.
+- **2026-04-19** — Created branch `feature/auth-nextauth-github`. Installed `next-auth@beta` (5.0.0-beta.31) and `@auth/prisma-adapter`. Created `src/auth.config.ts` (edge-compatible, GitHub provider), `src/auth.ts` (Prisma adapter + JWT strategy + session/jwt callbacks to expose `user.id`), `src/app/api/auth/[...nextauth]/route.ts` (GET/POST handlers), `src/proxy.ts` (named `proxy` export, redirects unauthenticated `/dashboard/*` to sign-in), `src/types/next-auth.d.ts` (Session extended with `user.id`). `tsc --noEmit` passes clean.
+
+# Previous Features
+
+## Add Pro Badge to Sidebar
+
+### Status
+
+Completed
+
+### Goals
 
 - Add a PRO badge next to the "Files" and "Images" item types in the sidebar
 - Use the shadcn/ui Badge component
@@ -16,13 +59,11 @@ Completed
 - "PRO" text is all uppercase
 - Badge is styled in gold
 
-## Notes
+### Notes
 
 See full spec at `context/features/add-pro-badge-sidebar.md`.
 
-## History
-
-<!-- Keep this updated. Earliest to latest -->
+### History
 
 - **2026-04-19** — Set current feature to Add Pro Badge to Sidebar.
 - **2026-04-19** — Created branch `feature/add-pro-badge-sidebar`. Installed shadcn/ui Badge component. Added `PRO_TYPES` set for `file` and `image`. Rendered gold PRO badge in sidebar item row for those types. `tsc --noEmit` passes clean.
