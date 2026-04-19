@@ -101,20 +101,24 @@ export type ItemTypeWithCount = {
   count: number
 }
 
+const SYSTEM_TYPE_ORDER = ['snippet', 'prompt', 'command', 'note', 'file', 'image', 'link'] as const
+
 export async function getItemTypesWithCounts(): Promise<ItemTypeWithCount[]> {
   const types = await prisma.itemType.findMany({
-    where: { isSystem: true },
+    where: { name: { in: [...SYSTEM_TYPE_ORDER] } },
     include: {
       _count: { select: { items: true } },
     },
-    orderBy: { name: 'asc' },
   })
-  return types.map(t => ({
-    id: t.id,
-    name: t.name,
-    icon: t.icon,
-    color: t.color,
-    isSystem: t.isSystem,
-    count: t._count.items,
-  }))
+  return SYSTEM_TYPE_ORDER
+    .map(name => types.find(t => t.name === name))
+    .filter((t): t is NonNullable<typeof t> => t != null)
+    .map(t => ({
+      id: t.id,
+      name: t.name,
+      icon: t.icon,
+      color: t.color,
+      isSystem: t.isSystem,
+      count: t._count.items,
+    }))
 }
