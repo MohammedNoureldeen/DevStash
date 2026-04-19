@@ -1,6 +1,6 @@
 # Current Feature
 
-Dashboard Items — Real Data
+Add Pro Badge to Sidebar
 
 ## Status
 
@@ -10,6 +10,34 @@ Completed
 
 ## Goals
 
+- Add a PRO badge next to the "Files" and "Images" item types in the sidebar
+- Use the shadcn/ui Badge component
+- Badge is clean and subtle in appearance
+- "PRO" text is all uppercase
+- Badge is styled in gold
+
+## Notes
+
+See full spec at `context/features/add-pro-badge-sidebar.md`.
+
+## History
+
+<!-- Keep this updated. Earliest to latest -->
+
+- **2026-04-19** — Set current feature to Add Pro Badge to Sidebar.
+- **2026-04-19** — Created branch `feature/add-pro-badge-sidebar`. Installed shadcn/ui Badge component. Added `PRO_TYPES` set for `file` and `image`. Rendered gold PRO badge in sidebar item row for those types. `tsc --noEmit` passes clean.
+- **2026-04-19** — Redesigned sidebar: compact "Navigation" header, `PanelLeftClose/Open` toggle (plain `<button>` to fix click), `SYSTEM_TYPE_ORDER` in `items.ts` to filter and order the 7 canonical types. Inserted correct system item types into Neon Dev branch. Fixed issue where data was inserted into production branch instead of Dev branch.
+
+# Previous Features
+
+## Dashboard Items — Real Data
+
+### Status
+
+Completed
+
+### Goals
+
 - Create `src/lib/db/items.ts` with data fetching functions
 - Fetch pinned and recent items directly in server component (replace mock data)
 - Item card icon/border color derived from the item type
@@ -17,33 +45,14 @@ Completed
 - If no pinned items exist, hide that section entirely
 - Update stats card counts from real database data
 
-## Notes
+### Notes
 
 See full spec at `context/features/dashboard-items-spec.md`.
 
-Key constraints:
-- Replace dummy item data from `src/lib/mock-data.ts` with real Prisma queries
-- Fetch directly in server component — no client-side fetching
-- Reference `context/screenshots/dashboard-ui-main.png` for layout/design
+### History
 
-## History
-
-<!-- Keep this updated. Earliest to latest -->
-
-- **2026-04-12** — Initial Next.js 15 + Tailwind CSS v4 project setup. Cleared boilerplate (SVGs, default page styles). Added `context/` directory with project overview, coding standards, AI interaction, and current feature docs.
-- **2026-04-12** — Set current feature to Dashboard UI Phase 1.
-- **2026-04-12** — Implemented phase 1: ShadCN UI init, Button/Input components, `/dashboard` route, dark mode, TopBar with search and new item button, sidebar and main placeholders.
-- **2026-04-12** — Implemented phase 2: collapsible sidebar with item type links, favorite/recent collections, user avatar, mobile drawer, DashboardShell layout component.
-- **2026-04-12** — Implemented phase 3: MainContent component with 4 stats cards, pinned items cards, recent collections grid, and recent items list (up to 10).
-- **2026-04-12** — Created branch `feature/dashboard-ui-phase-3` and verified phase 3 requirements are implemented and marked complete.
-- **2026-04-12** — Set current feature to Neon PostgreSQL + Prisma Setup.
-- **2026-04-13** — Created branch `feature/neon-prisma-setup`. Installed Prisma 7 + `@prisma/adapter-pg` + `pg`. Created `prisma/schema.prisma` (Prisma 7 format: provider `prisma-client`, output `../generated/prisma`, no URL in datasource). Created `prisma.config.ts` at root (datasource URL via `dotenv` + `process.env`). Created `src/lib/prisma.ts` singleton using `PrismaPg` driver adapter. Created `.env.example`. `prisma generate` and `tsc --noEmit` both pass.
-- **2026-04-13** — Added Neon dev + production connection strings to `.env`. Ran `prisma migrate dev --name init` — migration `20260412222311_init` created and applied to dev branch. All 10 tables live in Neon.
-- **2026-04-13** — Created `prisma/seed.ts` with demo user, 7 system item types, and 5 collections containing 18 items (React hooks/patterns, AI prompts, Docker/CI-CD configs, terminal commands, design resource links).
 - **2026-04-17** — Set current feature to Dashboard Items — Real Data.
 - **2026-04-17** — Created branch `feature/dashboard-items`. Created `src/lib/db/items.ts` with `getPinnedItems`, `getRecentItems`, `getDashboardStats`. Updated `app/dashboard/page.tsx` to fetch all data in parallel. Rewrote `MainContent.tsx` to accept real props — removed all mock-data imports, pinned section hidden when empty. Fixed `prisma/seed.ts` Prisma 7 import path and `itemType.upsert` → `findFirst`+`create`. `tsc --noEmit` passes clean.
-
-# Previous Features
 
 ## Dashboard Collections
 
