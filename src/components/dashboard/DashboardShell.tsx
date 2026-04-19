@@ -3,8 +3,19 @@
 import { useState } from 'react'
 import TopBar from './TopBar'
 import Sidebar, { type SidebarData } from './Sidebar'
+import type { Session } from 'next-auth'
 
-export default function DashboardShell({ children, sidebarData }: { children: React.ReactNode; sidebarData: SidebarData }) {
+type SidebarUser = Session['user'] | null
+
+export default function DashboardShell({
+  children,
+  sidebarData,
+  user,
+}: {
+  children: React.ReactNode
+  sidebarData: SidebarData
+  user: SidebarUser
+}) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -18,6 +29,7 @@ export default function DashboardShell({ children, sidebarData }: { children: Re
           onToggle={() => setCollapsed(prev => !prev)}
           onMobileClose={() => setMobileOpen(false)}
           sidebarData={sidebarData}
+          user={user}
         />
         <main className="flex-1 overflow-auto p-6">
           {children}

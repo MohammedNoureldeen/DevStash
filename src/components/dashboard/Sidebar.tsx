@@ -1,18 +1,21 @@
 'use client'
 
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { signOut } from 'next-auth/react'
 import {
   Code, Sparkles, StickyNote, Terminal,
   Link as LinkIcon, File, Image,
   Star, Clock, ChevronDown,
-  X, FolderOpen, Settings,
+  X, FolderOpen, LogOut,
   PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { mockUser } from '@/src/lib/mock-data'
 import { Badge } from '@/components/ui/badge'
+import UserAvatar from '@/src/components/ui/UserAvatar'
 import type { ItemTypeWithCount } from '@/src/lib/db/items'
 import type { FavoriteCollection, CollectionWithDetails } from '@/src/lib/db/collections'
+import type { Session } from 'next-auth'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Code,
@@ -42,23 +45,87 @@ export type SidebarData = {
   recentCollections: CollectionWithDetails[]
 }
 
+type SidebarUser = Session['user'] | null
+
 interface SidebarContentProps {
   collapsed: boolean
   onToggle: () => void
   onClose?: () => void
   isMobile?: boolean
   sidebarData: SidebarData
+  user: SidebarUser
 }
 
-function SidebarContent({ collapsed, onToggle, onClose, isMobile = false, sidebarData }: SidebarContentProps) {
+function UserFooter({ show, user }: { show: boolean; user: SidebarUser }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const name = user?.name ?? 'User'
+  const email = user?.email ?? ''
+  const image = user?.image ?? null
+
+  return (
+    <div className="border-t border-sidebar-border p-2.5 shrink-0 relative" ref={ref}>
+      {open && show && (
+        <div className="absolute bottom-full left-2.5 right-2.5 mb-1 rounded-lg border border-border bg-popover shadow-lg overflow-hidden z-50">
+          <button
+            type="button"
+            onClick={() => { setOpen(false); signOut({ callbackUrl: '/sign-in' }) }}
+            className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-foreground hover:bg-sidebar-accent transition-colors"
+          >
+            <LogOut className="h-3.5 w-3.5 text-muted-foreground" />
+            Sign out
+          </button>
+        </div>
+      )}
+
+      <div className={cn('flex items-center gap-2.5', !show && 'justify-center')}>
+        {show ? (
+          <button
+            type="button"
+            onClick={() => setOpen(prev => !prev)}
+            className="shrink-0 focus:outline-none"
+          >
+            <UserAvatar name={name} image={image} size={32} />
+          </button>
+        ) : (
+          <Link href="/profile" className="shrink-0" title={name}>
+            <UserAvatar name={name} image={image} size={32} />
+          </Link>
+        )}
+        {show && (
+          <>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">{name}</p>
+              <p className="text-xs text-muted-foreground truncate">{email}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(prev => !prev)}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors"
+            >
+              <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function SidebarContent({ collapsed, onToggle, onClose, isMobile = false, sidebarData, user }: SidebarContentProps) {
   const show = !collapsed || isMobile
   const { itemTypes, favoriteCollections, recentCollections } = sidebarData
-
-  const userInitials = mockUser.name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
 
   return (
     <div className="flex flex-col h-full">
@@ -213,27 +280,7 @@ function SidebarContent({ collapsed, onToggle, onClose, isMobile = false, sideba
       </div>
 
       {/* Footer */}
-      <div className="border-t border-sidebar-border p-2.5 shrink-0">
-        <div className={cn('flex items-center gap-2.5', !show && 'justify-center')}>
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-indigo-600 text-white text-xs font-bold shrink-0">
-            {userInitials}
-          </div>
-          {show && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{mockUser.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{mockUser.email}</p>
-            </div>
-          )}
-          {show && (
-            <button
-              type="button"
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors"
-            >
-              <Settings className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
+      <UserFooter show={show} user={user} />
 
     </div>
   )
@@ -245,9 +292,10 @@ interface SidebarProps {
   onToggle: () => void
   onMobileClose: () => void
   sidebarData: SidebarData
+  user: SidebarUser
 }
 
-export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose, sidebarData }: SidebarProps) {
+export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose, sidebarData, user }: SidebarProps) {
   return (
     <>
       {/* Backdrop */}
@@ -267,7 +315,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <SidebarContent collapsed={false} onToggle={onToggle} onClose={onMobileClose} isMobile sidebarData={sidebarData} />
+        <SidebarContent collapsed={false} onToggle={onToggle} onClose={onMobileClose} isMobile sidebarData={sidebarData} user={user} />
       </aside>
 
       {/* Desktop */}
@@ -278,7 +326,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
           collapsed ? 'w-14' : 'w-56'
         )}
       >
-        <SidebarContent collapsed={collapsed} onToggle={onToggle} sidebarData={sidebarData} />
+        <SidebarContent collapsed={collapsed} onToggle={onToggle} sidebarData={sidebarData} user={user} />
       </aside>
     </>
   )

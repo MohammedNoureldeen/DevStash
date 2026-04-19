@@ -1,20 +1,29 @@
-# Current Feature
+# Current Feature: Auth UI - Sign In, Register & Sign Out
 
 ## Status
 
-<!-- Not Started|In Progress|Completed -->
+In Progress
 
 ## Goals
 
-<!-- Add goals here -->
+- Create custom `/sign-in` page with email/password fields, "Sign in with GitHub" button, and link to register
+- Create custom `/register` page with name, email, password, confirm password fields; submit to `/api/auth/register`; redirect to sign-in on success
+- Update bottom of sidebar to show user avatar (GitHub image or initials fallback), user name, and dropdown with "Sign out" link
+- Clicking sidebar avatar/icon navigates to `/profile`
+- Create reusable avatar component handling both GitHub image and initials cases
 
 ## Notes
 
-<!-- Add notes here -->
+See full spec at `context/features/auth-spec-files/auth-phase-3-spec.md`.
+
+Avatar logic:
+- If user has `image` (from GitHub): use that
+- Otherwise: generate initials from name (e.g., "Brad Traversy" → "BT")
 
 ## History
 
-<!-- Keep this updated. Earliest to latest -->
+- **2026-04-20** — Loaded spec from `context/features/auth-spec-files/auth-phase-3-spec.md`.
+- **2026-04-20** — Created branch `feature/auth-ui-sign-in-register-sign-out`. Updated `src/auth.config.ts` with `pages: { signIn: '/sign-in' }`. Updated `src/proxy.ts` to redirect to `/sign-in`. Created `app/sign-in/page.tsx` (client, credentials form + GitHub OAuth button). Created `app/register/page.tsx` (client, full registration form → POST `/api/auth/register` → redirect to sign-in). Created `src/components/ui/UserAvatar.tsx` (GitHub image or initials fallback). Updated `app/dashboard/page.tsx` to fetch session via `auth()` and pass user to DashboardShell. Updated `src/components/dashboard/DashboardShell.tsx` to accept and forward user prop. Rewrote `src/components/dashboard/Sidebar.tsx` footer: real user data, UserAvatar, chevron-toggled dropdown with "Sign out" action; avatar in collapsed mode links to `/profile`. `tsc --noEmit` passes clean.
 
 # Previous Features
 
