@@ -34,3 +34,7 @@ App Router only (`app/` directory). No Pages Router.
 - `app/globals.css` — single `@import "tailwindcss"` entry point for Tailwind v4
 - `app/page.tsx` — home route (`/`)
 - `next.config.ts` — empty config, TypeScript
+
+
+
+**Important:** Done ever add claude to any commit message 
