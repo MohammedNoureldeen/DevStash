@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight, Sparkles, FolderOpen, Search, Zap, Shield, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { auth } from '@/src/auth'
 
 const FEATURES = [
   {
@@ -25,7 +26,10 @@ const FEATURES = [
   },
 ]
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await auth()
+  const getStartedHref = session?.user ? '/dashboard' : '/sign-in'
+
   return (
     <main className="min-h-screen bg-background">
       {/* Navigation */}
@@ -41,7 +45,7 @@ export default function LandingPage() {
             <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Dashboard
             </Link>
-            <Link href="/dashboard">
+            <Link href={getStartedHref}>
               <Button className="btn-professional gap-2 bg-gradient-to-r from-primary to-indigo-600 border-0">
                 Get Started
                 <ArrowRight className="h-4 w-4" />
@@ -80,7 +84,7 @@ export default function LandingPage() {
 
           {/* CTAs */}
           <div className="flex items-center justify-center gap-4">
-            <Link href="/dashboard">
+            <Link href={getStartedHref}>
               <Button size="lg" className="btn-professional gap-2 text-base px-8 bg-gradient-to-r from-primary to-indigo-600 border-0 h-12">
                 Get Started Free
                 <ChevronRight className="h-4 w-4" />
@@ -154,7 +158,7 @@ export default function LandingPage() {
               <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">
                 Join hundreds of developers who trust DevStash to keep their resources organized.
               </p>
-              <Link href="/dashboard">
+              <Link href={getStartedHref}>
                 <Button size="lg" className="btn-professional gap-2 text-base px-8 bg-gradient-to-r from-primary to-indigo-600 border-0 h-12">
                   Get Started Free
                   <ArrowRight className="h-4 w-4" />
