@@ -1,10 +1,30 @@
-# Current Feature — Auth Credentials: Email/Password Provider
+# Current Feature
 
 ## Status
 
-In Progress
+<!-- Not Started|In Progress|Completed -->
 
 ## Goals
+
+<!-- Add goals here -->
+
+## Notes
+
+<!-- Add notes here -->
+
+## History
+
+<!-- Keep this updated. Earliest to latest -->
+
+# Previous Features
+
+## Auth Credentials: Email/Password Provider
+
+### Status
+
+Completed
+
+### Goals
 
 - Add `password` field to `User` model via migration (if not already present)
 - Update `auth.config.ts` with Credentials provider placeholder (`authorize: () => null`)
@@ -13,18 +33,15 @@ In Progress
 - Validate passwords match, check for existing user, hash with bcryptjs, create user in DB
 - GitHub OAuth must continue to work after changes
 
-## Notes
+### Notes
 
-Spec: `context/features/auth-spec-files/auth-phase-2-spec.md`
+See full spec at `context/features/auth-spec-files/auth-phase-2-spec.md`.
 
-Uses split auth config pattern (edge-compatible `auth.config.ts` + full `auth.ts`).
-`bcryptjs` is already installed — no new dependencies needed for hashing.
-Credentials provider placeholder goes in `auth.config.ts`; real bcrypt logic overrides it in `auth.ts`.
-
-## History
+### History
 
 - **2026-04-19** — Loaded spec from `context/features/auth-spec-files/auth-phase-2-spec.md`.
 - **2026-04-19** — Created branch `feature/auth-credentials-email-password`. `password` field already present in schema (no migration needed). Updated `src/auth.config.ts` with Credentials provider placeholder (`authorize: () => null`). Updated `src/auth.ts` to override Credentials with bcrypt validation. Created `src/app/api/auth/register/route.ts` (POST handler: validates fields, checks passwords match, checks for existing user, hashes with bcrypt salt 12, creates user). `tsc --noEmit` passes clean.
+- **2026-04-19** — Merged into main. Feature complete.
 
 # Previous Features
 
