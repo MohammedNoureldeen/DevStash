@@ -26,19 +26,25 @@ export default function RegisterPage() {
 
     setLoading(true)
 
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, confirmPassword }),
-    })
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, confirmPassword }),
+      })
 
-    const data = await res.json() as { error?: string }
-    setLoading(false)
+      const data = await res.json() as { error?: string }
 
-    if (!res.ok) {
-      setError(data.error ?? 'Registration failed.')
-    } else {
+      if (!res.ok) {
+        setError(data.error ?? 'Registration failed.')
+        return
+      }
+
       router.push('/sign-in')
+    } catch {
+      setError('Registration failed.')
+    } finally {
+      setLoading(false)
     }
   }
 
