@@ -1,10 +1,30 @@
-# Current Feature: Profile Page
+# Current Feature
 
 ## Status
 
-In Progress
+<!-- Not Started|In Progress|Completed -->
 
 ## Goals
+
+<!-- Add goals here -->
+
+## Notes
+
+<!-- Add notes here -->
+
+## History
+
+<!-- Keep this updated. Earliest to latest -->
+
+# Previous Features
+
+## Profile Page
+
+### Status
+
+Completed
+
+### Goals
 
 - Create profile page at `/profile` route (protected)
 - Display user info: email, name, avatar (GitHub image or initials fallback), account creation date
@@ -12,18 +32,10 @@ In Progress
 - Add "Change password" action — email/password users only (hidden for GitHub OAuth users)
 - Add "Delete account" action with confirmation dialog to prevent accidental deletion
 
-## Notes
-
-- Avatar: use GitHub OAuth image if available, otherwise generate initials from name/email
-- Change password button must not appear for GitHub OAuth users (check `accounts` relation or absence of `password`)
-- Delete account confirmation dialog required before any destructive action
-- Spec: `context/features/profile-spec.md`
-
-## History
+### History
 
 - **2026-04-20** — Created branch `feature/profile-page`. Created `src/lib/db/profile.ts` (`getProfileData`, `getProfileStats` — scoped to userId, includes `isOAuthUser` check via accounts relation). Created `app/api/profile/change-password/route.ts` (POST: validates current password with bcrypt, hashes new, updates user; email users only). Created `app/api/profile/delete-account/route.ts` (DELETE: deletes user by session id). Created `src/components/profile/ProfileContent.tsx` (client: user info card with avatar, stats section with type breakdown, actions section with ChangePasswordDialog hidden for OAuth users and DeleteAccountDialog with confirmation). Created `app/profile/page.tsx` (server component: auth-protected, fetches all data in parallel, renders inside DashboardShell). `tsc --noEmit` passes clean.
-
-# Previous Features
+- **2026-04-20** — Merged into main. Feature complete.
 
 ## Forgot Password
 
