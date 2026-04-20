@@ -18,6 +18,31 @@
 
 # Previous Features
 
+## Email Verification on Register
+
+### Status
+
+Completed
+
+### Goals
+
+- After `POST /api/auth/register` succeeds, generate a secure token, store it in `VerificationToken` (identifier = email, expires = 24h), and send a verification email via Resend with a `/api/auth/verify-email?token=...` link
+- Create `GET /api/auth/verify-email` route: validate token exists and is not expired, set `User.emailVerified = now()`, delete the token, redirect to `/sign-in?verified=1`
+- On the `/sign-in` page, detect `?verified=1` and show a success toast/message ("Email verified — you can now sign in")
+- After registration, redirect to a `/verify-email` page (instead of directly to sign-in) telling the user to check their inbox
+- Install and use the `resend` npm package for sending email; use `RESEND_API_KEY` already in `.env`
+
+### Notes
+
+- Resend `onboarding@resend.dev` sandbox only delivers to the Resend account owner's email. Set `EMAIL_FROM` in `.env` to a verified domain address to send to any recipient.
+
+### History
+
+- **2026-04-20** — Created branch `feature/email-verification-on-register`. Installed `resend`. Created `src/lib/email.ts` (Resend client + `sendVerificationEmail` helper using `RESEND_API_KEY` and `NEXTAUTH_URL`). Updated `app/api/register/route.ts` to generate a `crypto.randomUUID()` token, store it in `VerificationToken` (expires 24h), and send verification email after user creation. Created `app/api/auth/verify-email/route.ts` (GET: validates token, checks expiry, sets `User.emailVerified`, deletes token, redirects to `/sign-in?verified=1`). Created `app/verify-email/page.tsx` (holding page: "check your inbox"). Updated `app/register/page.tsx` to redirect to `/verify-email` on success. Updated `app/sign-in/page.tsx` + `sign-in-form.tsx` to pass and render a success banner on `?verified=1`. `tsc --noEmit` passes clean.
+- **2026-04-20** — Merged into main. Feature complete.
+
+# Previous Features
+
 ## Auth UI - Sign In, Register & Sign Out
 
 ### Status
