@@ -34,7 +34,11 @@ export default function SignInForm({ callbackUrl, verified, reset }: SignInFormP
     setLoading(false)
 
     if (result?.error) {
-      setError('Invalid email or password.')
+      setError(
+        result.code === 'rate_limit'
+          ? 'Too many login attempts. Please try again later.'
+          : 'Invalid email or password.'
+      )
       return
     }
 

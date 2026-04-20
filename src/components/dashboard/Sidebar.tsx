@@ -88,7 +88,7 @@ function UserFooter({ show, user }: { show: boolean; user: SidebarUser }) {
           </Link>
           <button
             type="button"
-            onClick={() => { setOpen(false); signOut({ callbackUrl: '/sign-in' }) }}
+            onClick={() => { setOpen(false); signOut({ callbackUrl: '/dashboard' }) }}
             className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-foreground hover:bg-sidebar-accent transition-colors"
           >
             <LogOut className="h-3.5 w-3.5 text-muted-foreground" />
