@@ -4,13 +4,20 @@ type SignInPageProps = {
   searchParams: Promise<{
     callbackUrl?: string | string[]
     verified?: string
+    reset?: string
   }>
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const { callbackUrl, verified } = await searchParams
+  const { callbackUrl, verified, reset } = await searchParams
   const resolvedCallbackUrl =
     typeof callbackUrl === 'string' ? callbackUrl : callbackUrl?.[0] ?? '/dashboard'
 
-  return <SignInForm callbackUrl={resolvedCallbackUrl} verified={verified === '1'} />
+  return (
+    <SignInForm
+      callbackUrl={resolvedCallbackUrl}
+      verified={verified === '1'}
+      reset={reset === '1'}
+    />
+  )
 }

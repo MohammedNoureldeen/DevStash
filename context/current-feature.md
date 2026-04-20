@@ -1,20 +1,30 @@
-# Current Feature
+# Current Feature: Forgot Password
 
 ## Status
 
-<!-- Not Started|In Progress|Completed -->
+In Progress
 
 ## Goals
 
-<!-- Add goals here -->
+- Add a "Forgot password?" link to the `/sign-in` page that navigates to `/forgot-password`
+- Create `/forgot-password` page with an email input form; on submit, POST to `/api/auth/forgot-password`
+- Create `POST /api/auth/forgot-password` route: validate email exists, generate a `crypto.randomUUID()` token, store it in `VerificationToken` (identifier = `password-reset:{email}`, expires = 1h), send a password-reset email via Resend with a `/reset-password?token=...` link
+- Create `/reset-password` page: read `?token=` from the URL, show new-password + confirm-password fields, submit to `POST /api/auth/reset-password`
+- Create `POST /api/auth/reset-password` route: find `VerificationToken` by token value, validate it is not expired, hash the new password with bcrypt, update `User.password`, delete the token, return success
+- On success, redirect to `/sign-in?reset=1`; on the sign-in page detect `?reset=1` and show a success banner ("Password reset — you can now sign in")
+- Do not reveal whether an email exists (always respond with the same success message on `/forgot-password`)
+- Reuse the existing `VerificationToken` Prisma model; no schema changes needed
 
 ## Notes
 
-<!-- Add notes here -->
+- Use `identifier` prefix `password-reset:` to distinguish reset tokens from email-verification tokens already stored in `VerificationToken`
+- Resend is already configured in `src/lib/email.ts`; add a `sendPasswordResetEmail` helper alongside the existing `sendVerificationEmail`
+- Password validation: minimum 8 characters, passwords must match (client-side + server-side)
+- Token lookup: query `VerificationToken` where `token = <value>`, then verify `identifier` starts with `password-reset:`
 
 ## History
 
-<!-- Keep this updated. Earliest to latest -->
+- **2026-04-20** — Created branch `feature/forgot-password`. Added `sendPasswordResetEmail` to `src/lib/email.ts`. Created `app/api/auth/forgot-password/route.ts` (POST: stores `password-reset:{email}` token in `VerificationToken`, expires 1h, sends reset email; always returns success to avoid email enumeration). Created `app/api/auth/reset-password/route.ts` (POST: validates token, checks expiry, hashes new password with bcrypt, updates `User.password`, deletes token, returns success). Created `app/forgot-password/page.tsx` (email form with post-submit success state). Created `app/reset-password/page.tsx` (reads `?token=` via `useSearchParams`, new-password + confirm form). Updated `app/sign-in/page.tsx` + `sign-in-form.tsx` to pass `reset` prop and render success banner on `?reset=1`. Added "Forgot password?" link below sign-in button. `tsc --noEmit` passes clean.
 
 # Previous Features
 

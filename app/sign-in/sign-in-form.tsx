@@ -10,9 +10,10 @@ import { Input } from '@/components/ui/input'
 type SignInFormProps = {
   callbackUrl: string
   verified?: boolean
+  reset?: boolean
 }
 
-export default function SignInForm({ callbackUrl, verified }: SignInFormProps) {
+export default function SignInForm({ callbackUrl, verified, reset }: SignInFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -54,6 +55,12 @@ export default function SignInForm({ callbackUrl, verified }: SignInFormProps) {
           </p>
         )}
 
+        {reset && (
+          <p className="rounded-md bg-green-500/10 px-3 py-2 text-sm text-green-600 dark:text-green-400">
+            Password reset — you can now sign in.
+          </p>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
@@ -87,6 +94,11 @@ export default function SignInForm({ callbackUrl, verified }: SignInFormProps) {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign in'}
           </Button>
+          <p className="text-right text-sm">
+            <Link href="/forgot-password" className="text-muted-foreground hover:text-primary hover:underline">
+              Forgot password?
+            </Link>
+          </p>
         </form>
 
         <div className="relative">
