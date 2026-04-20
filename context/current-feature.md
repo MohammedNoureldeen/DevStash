@@ -1,10 +1,30 @@
-# Current Feature: Rate Limiting for Auth
+# Current Feature
 
 ## Status
 
-In Progress
+<!-- Not Started|In Progress|Completed -->
 
 ## Goals
+
+<!-- Add goals here -->
+
+## Notes
+
+<!-- Add notes here -->
+
+## History
+
+<!-- Keep this updated. Earliest to latest -->
+
+# Previous Features
+
+## Rate Limiting for Auth
+
+### Status
+
+Completed
+
+### Goals
 
 - Add rate limiting to `/api/auth/callback/credentials` (5 attempts / 15 min, keyed by IP + email)
 - Add rate limiting to `/api/auth/register` (3 attempts / 1 hour, keyed by IP)
@@ -13,23 +33,13 @@ In Progress
 - Add rate limiting to `/api/auth/resend-verification` (3 attempts / 15 min, keyed by IP + email)
 - Create reusable `src/lib/rate-limit.ts` utility using Upstash Redis + `@upstash/ratelimit`
 - Return 429 responses with `Retry-After` header and user-friendly message
-- Display rate limit errors via toast on the frontend
+- Display rate limit errors on the frontend
 - Fail open if Upstash is unavailable
 
-## Notes
+### History
 
-- Use sliding window algorithm
-- Extract IP from `x-forwarded-for` header (Vercel) or request
-- Login limiting via NextAuth credentials callback may need a custom sign-in handler
-- Upstash free tier: 10k requests/day (sufficient)
-- Required env vars: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
-- Spec: `context/features/rate-limiting-spec.md`
-
-## History
-
-- **2026-04-20** — Created branch `feature/rate-limiting-auth`. Installed `@upstash/ratelimit` and `@upstash/redis`. Created `src/lib/rate-limit.ts` (5 pre-configured sliding-window Ratelimit instances, `getIP` helper, `rateLimit` wrapper with fail-open catch). Added login rate limiting to `src/auth.ts` via custom `RateLimitError extends CredentialsSignin` (code `"rate_limit"`, keyed by IP + email). Added IP-keyed rate limiting to `app/api/register/route.ts`, `app/api/auth/forgot-password/route.ts`, `app/api/auth/reset-password/route.ts`. Created `app/api/auth/resend-verification/route.ts` (IP + email keyed, fail-open, always returns success). Updated `app/sign-in/sign-in-form.tsx` to show rate limit message on `result.code === "rate_limit"`. Updated `app/forgot-password/page.tsx` to surface API error message. Converted `app/verify-email/page.tsx` to client component with resend form. Updated `.env.example` with Upstash vars. `tsc --noEmit` passes clean.
-
-# Previous Features
+- **2026-04-20** — Created branch `feature/rate-limiting-auth`. Installed `@upstash/ratelimit` and `@upstash/redis`. Created `src/lib/rate-limit.ts` (5 pre-configured sliding-window Ratelimit instances, `getIP` helper, `rateLimit` wrapper with fail-open catch). Added login rate limiting to `src/auth.ts` via custom `RateLimitError extends CredentialsSignin` (code `"rate_limit"`, keyed by IP + email). Added IP-keyed rate limiting to `app/api/register/route.ts`, `app/api/auth/forgot-password/route.ts`, `app/api/auth/reset-password/route.ts`. Created `app/api/auth/resend-verification/route.ts` (IP + email keyed, always returns success). Updated `app/sign-in/sign-in-form.tsx` to show rate limit message on `result.code === "rate_limit"`. Updated `app/forgot-password/page.tsx` to surface API error. Converted `app/verify-email/page.tsx` to client component with resend form. Updated sign-out `callbackUrl` to `/dashboard`. Updated `.env.example` with Upstash vars. `tsc --noEmit` passes clean.
+- **2026-04-20** — Merged into main. Feature complete.
 
 ## Profile Page
 
