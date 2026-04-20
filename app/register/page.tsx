@@ -40,7 +40,7 @@ export default function RegisterPage() {
         return
       }
 
-      router.push('/sign-in')
+      router.push('/verify-email')
     } catch {
       setError('Registration failed.')
     } finally {

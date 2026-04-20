@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input'
 
 type SignInFormProps = {
   callbackUrl: string
+  verified?: boolean
 }
 
-export default function SignInForm({ callbackUrl }: SignInFormProps) {
+export default function SignInForm({ callbackUrl, verified }: SignInFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -46,6 +47,12 @@ export default function SignInForm({ callbackUrl }: SignInFormProps) {
           <h1 className="text-2xl font-bold text-foreground">Sign in</h1>
           <p className="mt-1 text-sm text-muted-foreground">Welcome back to DevStash</p>
         </div>
+
+        {verified && (
+          <p className="rounded-md bg-green-500/10 px-3 py-2 text-sm text-green-600 dark:text-green-400">
+            Email verified — you can now sign in.
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
