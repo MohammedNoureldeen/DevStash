@@ -191,9 +191,18 @@ function ChangePasswordDialog() {
 
 function DeleteAccountDialog() {
   const [open, setOpen] = useState(false)
+  const [confirmation, setConfirmation] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+
+  function handleOpenChange(value: boolean) {
+    setOpen(value)
+    if (!value) {
+      setConfirmation('')
+      setError(null)
+    }
+  }
 
   async function handleDelete() {
     setError(null)
@@ -213,7 +222,7 @@ function DeleteAccountDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger className="w-full">
         <Button variant="outline" className="w-full justify-start text-red-500 hover:text-red-500 hover:border-red-500">
           Delete Account
@@ -226,12 +235,27 @@ function DeleteAccountDialog() {
             This will permanently delete your account and all your data. This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
+        <div className="space-y-2 py-1">
+          <p className="text-sm text-muted-foreground">
+            Type <span className="font-semibold text-foreground">delete</span> to confirm.
+          </p>
+          <Input
+            placeholder="delete"
+            value={confirmation}
+            onChange={e => setConfirmation(e.target.value)}
+            autoComplete="off"
+          />
+        </div>
         {error && <p className="text-sm text-red-500">{error}</p>}
         <DialogFooter>
-          <Button variant="ghost" onClick={() => setOpen(false)} disabled={loading}>
+          <Button variant="ghost" onClick={() => handleOpenChange(false)} disabled={loading}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleDelete} disabled={loading}>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={loading || confirmation !== 'delete'}
+          >
             {loading ? 'Deleting…' : 'Delete my account'}
           </Button>
         </DialogFooter>

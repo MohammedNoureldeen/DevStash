@@ -7,7 +7,7 @@ import {
   Code, Sparkles, StickyNote, Terminal,
   Link as LinkIcon, File, Image,
   Star, Clock, ChevronDown,
-  X, FolderOpen, LogOut,
+  X, FolderOpen, LogOut, User,
   PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -78,6 +78,14 @@ function UserFooter({ show, user }: { show: boolean; user: SidebarUser }) {
     <div className="border-t border-sidebar-border p-2.5 shrink-0 relative" ref={ref}>
       {open && show && (
         <div className="absolute bottom-full left-2.5 right-2.5 mb-1 rounded-lg border border-border bg-popover shadow-lg overflow-hidden z-50">
+          <Link
+            href="/profile"
+            onClick={() => setOpen(false)}
+            className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-foreground hover:bg-sidebar-accent transition-colors"
+          >
+            <User className="h-3.5 w-3.5 text-muted-foreground" />
+            Profile
+          </Link>
           <button
             type="button"
             onClick={() => { setOpen(false); signOut({ callbackUrl: '/sign-in' }) }}
