@@ -1,10 +1,30 @@
-# Current Feature: Items List View
+# Current Feature
 
 ## Status
 
-In Progress
+<!-- Not Started|In Progress|Completed -->
 
 ## Goals
+
+<!-- Add goals here -->
+
+## Notes
+
+<!-- Add notes here -->
+
+## History
+
+<!-- Keep this updated. Earliest to latest -->
+
+# Previous Features
+
+## Items List View
+
+### Status
+
+Completed
+
+### Goals
 
 - Create dynamic route `/items/[type]` (e.g., `/items/snippets`, `/items/notes`)
 - Fetch and display items filtered by type
@@ -13,15 +33,10 @@ In Progress
 - Each card has left border colored by item type
 - Follow existing codebase patterns
 
-## Notes
-
-Spec loaded from `context/features/item-list-view-spec.md`.
-
-## History
+### History
 
 - **2026-04-24** — Created branch `feature/item-list-view`. Added `getItemsByTypeName` to `src/lib/db/items.ts` (filters by `itemType.name`, ordered by `updatedAt desc`). Created `src/components/items/ItemsListContent.tsx` (2-column responsive grid, each card with `border-l-4` colored by item type, empty state, item count subtitle). Created `app/items/[type]/page.tsx` (server component: converts plural slug to singular via `PLURAL_TO_SINGULAR` map, 404s on unknown type, auth-protected redirect, fetches all data in parallel, renders inside `DashboardShell`). `tsc --noEmit` passes clean.
-
-# Previous Features
+- **2026-04-24** — Merged into main. Feature complete.
 
 ## Rate Limiting for Auth
 
