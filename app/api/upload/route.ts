@@ -58,6 +58,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `File too large (max ${maxMB}MB)` }, { status: 400 })
   }
 
+  const missingVars = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME']
+    .filter((v) => !process.env[v])
+  if (missingVars.length > 0) {
+    return NextResponse.json(
+      { error: `R2 not configured. Missing: ${missingVars.join(', ')}` },
+      { status: 500 },
+    )
+  }
+
   const ext = fileName.split('.').pop() ?? 'bin'
   const key = `${session.user.id}/${randomUUID()}.${ext}`
 
@@ -65,8 +74,9 @@ export async function POST(req: Request) {
   try {
     uploadUrl = await getPresignedUploadUrl(key, mimeType)
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
     console.error('[upload] getPresignedUploadUrl failed:', err)
-    return NextResponse.json({ error: 'Failed to generate upload URL' }, { status: 500 })
+    return NextResponse.json({ error: `Failed to generate upload URL: ${message}` }, { status: 500 })
   }
 
   return NextResponse.json({ uploadUrl, key, fileName, fileSize, mimeType })
