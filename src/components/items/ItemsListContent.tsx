@@ -1,9 +1,13 @@
+'use client'
+
+import { useState } from 'react'
 import {
   Code, Sparkles, StickyNote, Terminal,
   Link as LinkIcon, File, Image,
   Star,
 } from 'lucide-react'
 import type { ItemWithType } from '@/src/lib/db/items'
+import ItemDrawer from './ItemDrawer'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Code,
@@ -19,13 +23,14 @@ function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function ItemCard({ item }: { item: ItemWithType }) {
+function ItemCard({ item, onClick }: { item: ItemWithType; onClick: () => void }) {
   const Icon = ICON_MAP[item.itemType.icon] ?? File
 
   return (
     <div
       className="glass-card hover-lift rounded-xl p-4 cursor-pointer group border-l-4"
       style={{ borderLeftColor: item.itemType.color }}
+      onClick={onClick}
     >
       <div className="flex items-start gap-3">
         <div
@@ -67,26 +72,40 @@ export default function ItemsListContent({
   typeLabel: string
   typeColor: string
 }) {
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
+
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground capitalize">{typeLabel}</h1>
-        <p className="text-muted-foreground mt-1" style={{ color: typeColor }}>
-          {items.length} {items.length === 1 ? 'item' : 'items'}
-        </p>
+    <>
+      <div className="flex flex-col gap-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground capitalize">{typeLabel}</h1>
+          <p className="text-muted-foreground mt-1" style={{ color: typeColor }}>
+            {items.length} {items.length === 1 ? 'item' : 'items'}
+          </p>
+        </div>
+
+        {items.length === 0 ? (
+          <div className="glass-card rounded-xl p-12 text-center">
+            <p className="text-muted-foreground">No {typeLabel.toLowerCase()} yet.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {items.map(item => (
+              <ItemCard
+                key={item.id}
+                item={item}
+                onClick={() => setSelectedItemId(item.id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {items.length === 0 ? (
-        <div className="glass-card rounded-xl p-12 text-center">
-          <p className="text-muted-foreground">No {typeLabel.toLowerCase()} yet.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {items.map(item => (
-            <ItemCard key={item.id} item={item} />
-          ))}
-        </div>
-      )}
-    </div>
+      <ItemDrawer
+        open={!!selectedItemId}
+        itemId={selectedItemId}
+        onClose={() => setSelectedItemId(null)}
+      />
+    </>
   )
 }

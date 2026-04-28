@@ -112,6 +112,15 @@ export async function getItemsByTypeName(typeName: string): Promise<ItemWithType
   return items.map(mapItem)
 }
 
+export async function getItemById(id: string, userId: string): Promise<ItemWithType | null> {
+  const item = await prisma.item.findFirst({
+    where: { id, userId },
+    include: itemWithTypeInclude,
+  })
+  if (!item) return null
+  return mapItem(item)
+}
+
 export async function getItemTypesWithCounts(): Promise<ItemTypeWithCount[]> {
   const types = await prisma.itemType.findMany({
     where: { name: { in: [...SYSTEM_TYPE_ORDER] } },

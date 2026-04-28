@@ -1,20 +1,31 @@
-# Current Feature
+# Current Feature — Item Drawer
 
 ## Status
 
-<!-- Not Started|In Progress|Completed -->
+In Progress
 
 ## Goals
 
-<!-- Add goals here -->
+- Use shadcn Sheet component, opens from the right
+- Clicking an ItemCard opens the drawer with that item's full data
+- Works on both dashboard and items list pages
+- Action bar with Favorite (star, yellow when active), Pin, Copy, Edit (pencil), and Delete (trash, right-aligned)
+- Client wrapper component to manage drawer state (pages are server components)
+- Fetch full item detail on click via `/api/items/[id]` (no page navigation)
+- Show skeleton/loading state while fetching
+- Card data stays server-fetched; only full detail is client-fetched on open
 
 ## Notes
 
-<!-- Add notes here -->
+- No separate item page — drawer is the item detail view
+- Code editor and item-specific content comes later; focus on drawer shell + details display now
+- Query function lives in `lib/db/items.ts`; API route calls it with auth check
+- See `context/screenshots/dashboard-ui-drawer.png` for visual design reference
+- Spec: `context/features/item-drawer-spec.md`
 
 ## History
 
-<!-- Keep this updated. Earliest to latest -->
+- **2026-04-28** — Created branch `feature/item-drawer`. Installed shadcn Sheet component (Base UI variant). Added `getItemById(id, userId)` to `src/lib/db/items.ts` (scoped to user). Created `app/api/items/[id]/route.ts` (GET: auth check, returns item JSON, 401/404 on error). Created `src/components/items/ItemDrawer.tsx` (client: controlled Sheet, fetches on itemId change, skeleton loading, action bar with Favorite/Pin/Copy/Edit/Delete, content + metadata display). Converted `src/components/items/ItemsListContent.tsx` to client component — added drawer state + onClick on each card. Converted `src/components/dashboard/MainContent.tsx` to client component — added drawer state + onClick on PinnedItemCard and RecentItemRow. `tsc --noEmit` passes clean.
 
 # Previous Features
 

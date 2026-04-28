@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import {
   Code, Sparkles, StickyNote, Terminal,
@@ -9,6 +12,7 @@ import {
 import type { CollectionWithDetails } from '@/src/lib/db/collections'
 import type { DashboardStats, ItemWithType } from '@/src/lib/db/items'
 import CollectionCard from './CollectionCard'
+import ItemDrawer from '@/src/components/items/ItemDrawer'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Code,
@@ -58,11 +62,14 @@ function StatCard({
   )
 }
 
-function PinnedItemCard({ item }: { item: ItemWithType }) {
+function PinnedItemCard({ item, onClick }: { item: ItemWithType; onClick: () => void }) {
   const Icon = ICON_MAP[item.itemType.icon] ?? File
 
   return (
-    <div className="glass-card hover-lift rounded-xl p-4 cursor-pointer group">
+    <div
+      className="glass-card hover-lift rounded-xl p-4 cursor-pointer group"
+      onClick={onClick}
+    >
       <div className="flex items-start gap-3">
         <div className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0" style={{ backgroundColor: `${item.itemType.color}15` }}>
           <Icon className="h-4 w-4" style={{ color: item.itemType.color }} />
@@ -90,11 +97,14 @@ function PinnedItemCard({ item }: { item: ItemWithType }) {
   )
 }
 
-function RecentItemRow({ item }: { item: ItemWithType }) {
+function RecentItemRow({ item, onClick }: { item: ItemWithType; onClick: () => void }) {
   const Icon = ICON_MAP[item.itemType.icon] ?? File
 
   return (
-    <div className="flex items-center gap-3 py-3 px-4 rounded-lg cursor-pointer transition-all duration-200 hover:bg-secondary/50 group">
+    <div
+      className="flex items-center gap-3 py-3 px-4 rounded-lg cursor-pointer transition-all duration-200 hover:bg-secondary/50 group"
+      onClick={onClick}
+    >
       <div className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-transform group-hover:scale-105" style={{ backgroundColor: `${item.itemType.color}12` }}>
         <Icon className="h-4 w-4" style={{ color: item.itemType.color }} />
       </div>
@@ -141,59 +151,76 @@ export default function MainContent({
   recentItems: ItemWithType[]
   stats: DashboardStats
 }) {
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
+
   return (
-    <div className="flex flex-col gap-8">
+    <>
+      <div className="flex flex-col gap-8">
 
-      {/* Welcome */}
-      <div className="mb-2">
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Manage and organize your development resources</p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Items" value={stats.totalItems} icon={Layers} trend="+12%" />
-        <StatCard label="Collections" value={stats.totalCollections} icon={FolderOpen} trend="+5%" />
-        <StatCard label="Favorites" value={stats.favoriteItems} icon={Star} />
-        <StatCard label="Saved" value={stats.favoriteCollections} icon={BookMarked} />
-      </div>
-
-      {/* Collections */}
-      <section>
-        <SectionHeader title="Collections" action={{ label: 'View all', href: '/collections' }} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {collections.map(col => (
-            <CollectionCard key={col.id} collection={col} />
-          ))}
+        {/* Welcome */}
+        <div className="mb-2">
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Manage and organize your development resources</p>
         </div>
-      </section>
 
-      {/* Pinned Items */}
-      {pinnedItems.length > 0 && (
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label="Total Items" value={stats.totalItems} icon={Layers} trend="+12%" />
+          <StatCard label="Collections" value={stats.totalCollections} icon={FolderOpen} trend="+5%" />
+          <StatCard label="Favorites" value={stats.favoriteItems} icon={Star} />
+          <StatCard label="Saved" value={stats.favoriteCollections} icon={BookMarked} />
+        </div>
+
+        {/* Collections */}
         <section>
-          <SectionHeader title="Pinned Items" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {pinnedItems.map(item => (
-              <PinnedItemCard key={item.id} item={item} />
+          <SectionHeader title="Collections" action={{ label: 'View all', href: '/collections' }} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {collections.map(col => (
+              <CollectionCard key={col.id} collection={col} />
             ))}
           </div>
         </section>
-      )}
 
-      {/* Recent Items */}
-      {recentItems.length > 0 && (
-        <section>
-          <SectionHeader title="Recent Activity" />
-          <div className="glass-card rounded-xl overflow-hidden">
-            {recentItems.map((item, idx) => (
-              <div key={item.id} className={idx !== recentItems.length - 1 ? 'border-b border-border' : ''}>
-                <RecentItemRow item={item} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+        {/* Pinned Items */}
+        {pinnedItems.length > 0 && (
+          <section>
+            <SectionHeader title="Pinned Items" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {pinnedItems.map(item => (
+                <PinnedItemCard
+                  key={item.id}
+                  item={item}
+                  onClick={() => setSelectedItemId(item.id)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-    </div>
+        {/* Recent Items */}
+        {recentItems.length > 0 && (
+          <section>
+            <SectionHeader title="Recent Activity" />
+            <div className="glass-card rounded-xl overflow-hidden">
+              {recentItems.map((item, idx) => (
+                <div key={item.id} className={idx !== recentItems.length - 1 ? 'border-b border-border' : ''}>
+                  <RecentItemRow
+                    item={item}
+                    onClick={() => setSelectedItemId(item.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+      </div>
+
+      <ItemDrawer
+        open={!!selectedItemId}
+        itemId={selectedItemId}
+        onClose={() => setSelectedItemId(null)}
+      />
+    </>
   )
 }
