@@ -10,6 +10,25 @@ Not Started
 
 ## History
 
+## Image Gallery View
+
+### Status
+
+Completed
+
+### Goals
+
+- Create an image thumbnail card to replace the current item card
+- Show an image grid/gallery with 3 columns
+- Display image thumbnail with 16:9 aspect ratio (`aspect-video`)
+- Use `object-cover` to fill the card (may crop edges)
+- Subtle hover zoom effect (5% scale with 300ms transition)
+
+### History
+
+- **2026-04-28** — Created branch `feature/image-gallery-view`. Added `ImageThumbnailCard` component to `src/components/items/ItemsListContent.tsx` (16:9 `aspect-video` thumbnail, `object-cover`, 5% hover scale with 300ms transition, image proxied through `/api/files/${item.fileUrl}`, fallback icon when no `fileUrl`, title + description below). Added `isImageGallery` flag (detects `typeLabel === 'images'`) to switch between a 3-column thumbnail grid (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`) and the existing 2-column item card grid. `tsc --noEmit` passes clean.
+- **2026-04-28** — Merged into main. Feature complete.
+
 ## File Upload with Cloudflare R2
 
 ### Status
