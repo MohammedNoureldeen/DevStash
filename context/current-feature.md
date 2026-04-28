@@ -10,6 +10,28 @@ Not Started
 
 ## History
 
+## Markdown Editor
+
+### Status
+
+Completed
+
+### Goals
+
+- Create `MarkdownEditor` component with tabbed interface (Write/Preview)
+- Replace Textarea with `MarkdownEditor` for notes and prompts only; keep `CodeEditor` for snippets and commands
+- Use `react-markdown` with `remark-gfm` for GitHub Flavored Markdown support
+- Match existing dark theme styling (`bg-[#1e1e1e]` container, `bg-[#2d2d2d]` header)
+- Add copy button in header (same style as `CodeEditor`)
+- Support both display (readonly) and edit modes
+- In readonly mode, only show Preview tab; in edit mode, default to Write tab
+- Fluid height with max 400px, matching `CodeEditor` behavior
+
+### History
+
+- **2026-04-28** — Created branch `feature/markdown-editor`. Installed `react-markdown` and `remark-gfm`. Created `src/components/ui/MarkdownEditor.tsx` (Write/Preview tabs, copy button with check feedback, auto-growing textarea min 100px max 400px via scrollHeight ref, `react-markdown` + `remark-gfm` for GFM preview, readonly mode shows Preview tab only, matching dark theme `bg-[#1e1e1e]`/`bg-[#2d2d2d]`). Added `.markdown-preview` CSS block to `app/globals.css` (h1–h6 sizing, inline/block code, lists, blockquotes with indigo accent, links, tables, hr, strong, em). Updated `src/components/items/NewItemDialog.tsx`: added `MARKDOWN_TYPES` set; note/prompt content now uses `<MarkdownEditor onChange>` instead of plain textarea. Updated `src/components/items/ItemDrawer.tsx`: added `MARKDOWN_TYPES` and `showMarkdown` derived flag; edit mode uses `<MarkdownEditor onChange>` and view mode uses `<MarkdownEditor readOnly>` for note/prompt types. `tsc --noEmit` passes clean.
+- **2026-04-28** — Merged into main. Feature complete.
+
 ## Code Editor
 
 ### Status
