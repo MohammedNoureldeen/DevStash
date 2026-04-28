@@ -1,6 +1,6 @@
 'use client'
 
-import { Menu, Search, Bell, Plus } from "lucide-react";
+import { Menu, Search, Bell, Plus, FolderPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -8,9 +8,10 @@ import Link from "next/link";
 interface TopBarProps {
   onMobileMenuClick: () => void
   onNewItem: () => void
+  onNewCollection: () => void
 }
 
-export default function TopBar({ onMobileMenuClick, onNewItem }: TopBarProps) {
+export default function TopBar({ onMobileMenuClick, onNewItem, onNewCollection }: TopBarProps) {
   return (
     <header className="flex items-center gap-4 border-b border-border bg-background/95 backdrop-blur-sm px-4 h-16 shrink-0">
       {/* Mobile menu button */}
@@ -46,13 +47,21 @@ export default function TopBar({ onMobileMenuClick, onNewItem }: TopBarProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-2 ml-auto">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="h-9 w-9 rounded-lg hover:bg-secondary relative"
         >
           <Bell className="h-4 w-4" />
           <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
+        </Button>
+        <Button
+          variant="outline"
+          className="h-9 gap-2"
+          onClick={onNewCollection}
+        >
+          <FolderPlus className="h-4 w-4" />
+          <span className="hidden sm:inline">New Collection</span>
         </Button>
         <Button
           className="h-9 gap-2 btn-professional bg-gradient-to-r from-primary to-indigo-600 border-0"

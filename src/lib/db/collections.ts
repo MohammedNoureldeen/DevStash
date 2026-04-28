@@ -1,6 +1,11 @@
 import { prisma } from '@/src/lib/prisma'
 import type { ItemWithType } from './items'
 
+export type CreateCollectionData = {
+  name: string
+  description?: string | null
+}
+
 export type FavoriteCollection = {
   id: string
   name: string
@@ -65,6 +70,29 @@ function mapCollection(col: RawCollection): CollectionWithDetails {
     typeIcons,
     borderColor,
   }
+}
+
+export async function createCollection(
+  userId: string,
+  data: CreateCollectionData,
+): Promise<CollectionWithDetails> {
+  const col = await prisma.collection.create({
+    data: {
+      name: data.name,
+      description: data.description ?? null,
+      userId,
+    },
+    include: {
+      items: {
+        include: {
+          item: {
+            include: { itemType: true },
+          },
+        },
+      },
+    },
+  })
+  return mapCollection(col)
 }
 
 export async function getRecentCollections(limit = 6): Promise<CollectionWithDetails[]> {

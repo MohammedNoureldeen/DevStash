@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Collection Create
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add `createCollection(userId, { name, description })` function to `src/lib/db/collections.ts`
+- Create `src/actions/collections.ts` with a Zod-validated `createCollection` server action (name required, description optional); follow `{ success, data, error }` pattern
+- Create `src/components/collections/NewCollectionDialog.tsx` — modal with name (required) and description (optional) fields; toast on success or failure; `router.refresh()` on success to reflect the new collection
+- Add `onNewCollection` prop to `TopBar`; render a "New Collection" button alongside the existing "New" button
+- Update `DashboardShell` to hold `newCollectionOpen` state and render `<NewCollectionDialog>`
+- Collections are user-scoped: always pass `session.user.id` and scope DB queries to the authenticated user
+
 ## Notes
+
+- Collection model: `id`, `name`, `description?`, `isFavorite` (default false), `userId` (required), `createdAt`, `updatedAt`
+- Follow same patterns as item create: server action in `src/actions/`, DB function in `src/lib/db/`, client dialog component in `src/components/collections/`
+- `DashboardShell` is the client wrapper that holds modal state — mirror how `newItemOpen` / `NewItemDialog` is wired up
+- No schema changes required; `Collection` model already has `userId` and `description?`
 
 ## History
 

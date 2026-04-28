@@ -4,6 +4,7 @@ import { useState } from 'react'
 import TopBar from './TopBar'
 import Sidebar, { type SidebarData } from './Sidebar'
 import NewItemDialog from '@/src/components/items/NewItemDialog'
+import NewCollectionDialog from '@/src/components/collections/NewCollectionDialog'
 import type { Session } from 'next-auth'
 
 type SidebarUser = Session['user'] | null
@@ -20,11 +21,17 @@ export default function DashboardShell({
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [newItemOpen, setNewItemOpen] = useState(false)
+  const [newCollectionOpen, setNewCollectionOpen] = useState(false)
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} />
-      <TopBar onMobileMenuClick={() => setMobileOpen(true)} onNewItem={() => setNewItemOpen(true)} />
+      <NewCollectionDialog open={newCollectionOpen} onOpenChange={setNewCollectionOpen} />
+      <TopBar
+        onMobileMenuClick={() => setMobileOpen(true)}
+        onNewItem={() => setNewItemOpen(true)}
+        onNewCollection={() => setNewCollectionOpen(true)}
+      />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           collapsed={collapsed}
