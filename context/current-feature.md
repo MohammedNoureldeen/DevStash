@@ -1,31 +1,14 @@
-# Current Feature: Delete Item
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Wire up the Delete button in the `ItemDrawer` action bar so clicking it triggers a confirmation dialog
-- Use the shadcn/ui `AlertDialog` component for the confirmation (`AlertDialogAction` / `AlertDialogCancel`)
-- On confirm, call `DELETE /api/items/[id]` to delete the item server-side
-- Show a success toast via shadcn/ui `Sonner` (or existing toast setup) on successful delete
-- Close the drawer after successful delete
-- Invalidate / refresh the item list so the deleted item disappears without a full page reload
-- Show an error toast if the delete request fails
-
 ## Notes
 
-- The Delete button already exists in `ItemDrawer.tsx` — only the handler needs wiring
-- The API route `app/api/items/[id]/route.ts` needs a `DELETE` handler added (GET already exists)
-- The delete DB operation should be added to `src/lib/db/items.ts`
-- After delete, the parent list page (server component) needs to be refreshed — use `router.refresh()` from `useRouter`
-- Use shadcn/ui `AlertDialog` (install if not already present) for the confirmation modal
-- Use the existing toast system (check which toast library is in use before adding a new one)
-
 ## History
-
-- **2026-04-28** — Created branch `feature/delete-item`. Installed shadcn `AlertDialog` component. Added `deleteItem(id, userId)` to `src/lib/db/items.ts`. Added `DELETE` handler to `app/api/items/[id]/route.ts` (auth check, 404 if not found, deletes and returns 204). Updated `src/components/items/ItemDrawer.tsx`: added `deleteDialogOpen` + `isDeleting` state, `handleDelete` async function (fetch DELETE → success toast → `onClose()` → `router.refresh()`, error toast on failure), wired Delete button to open dialog, added `AlertDialog` with destructive confirm action. `tsc --noEmit` passes clean.
 
 # Previous Features
 
