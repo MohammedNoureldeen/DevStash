@@ -1,10 +1,22 @@
-# Current Feature: File Upload with Cloudflare R2
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
+
+## Notes
+
+## History
+
+## File Upload with Cloudflare R2
+
+### Status
+
+Completed
+
+### Goals
 
 - Create upload API route for R2
 - Stick to `lib/db/items.ts` for Prisma/DB functions
@@ -16,22 +28,10 @@ In Progress
 - Show upload progress indicator
 - Display image preview for images, file info for files
 
-## Notes
+### History
 
-### File Constraints
-
-| Type   | Max Size | Extensions |
-| ------ | -------- | ---------- |
-| Images | 5 MB     | `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, `.svg` |
-| Files  | 10 MB    | `.pdf`, `.txt`, `.md`, `.json`, `.yaml`, `.yml`, `.xml`, `.csv`, `.toml`, `.ini` |
-
-### MIME Types
-
-**Images:** `image/png`, `image/jpeg`, `image/gif`, `image/webp`, `image/svg+xml`
-
-**Files:** `application/pdf`, `text/plain`, `text/markdown`, `application/json`, `application/x-yaml`, `text/yaml`, `application/xml`, `text/xml`, `text/csv`, `application/toml`
-
-## History
+- **2026-04-28** — Created branch `feature/file-upload-r2`. Installed `@aws-sdk/client-s3`. Created `src/lib/r2.ts` (S3Client pointed at R2 endpoint, `uploadToR2`, `deleteFromR2`, `getFromR2`). Created `app/api/upload/route.ts` (POST: auth, MIME/size validation — images 5 MB, files 10 MB — uploads to R2, returns `{ key, fileName, fileSize, mimeType }`). Created `app/api/files/[...key]/route.ts` (GET: auth, user-scoped key check, streams object from R2 with `Content-Disposition: inline`). Created `src/components/ui/FileUpload.tsx` (drag-and-drop zone, XHR upload with progress bar, object-URL image preview, file info card with clear button, exports `UploadResult` type). Updated `src/lib/db/items.ts`: added `fileUrl`, `fileName`, `fileSize` to `ItemWithType`, `CreateItemData`, `mapItem`, and `createItem`. Updated `src/actions/items.ts`: added `file`/`image` to `ALLOWED_TYPES` (→ `FILE` content type), Zod validates `fileKey` required for those types. Updated `src/components/items/NewItemDialog.tsx`: added File and Image type buttons; shows `<FileUpload>` for those types; `isValid` gates on upload completion. Updated `src/components/items/ItemDrawer.tsx`: view mode shows image preview + download link or file info card + download link; edit mode shows non-editable file name/size row. Updated `app/api/items/[id]/route.ts` DELETE: calls `deleteFromR2` before removing DB record. Updated `.env.example` with `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`. `tsc --noEmit` passes clean.
+- **2026-04-28** — Merged into main. Feature complete.
 
 ## Markdown Editor
 
