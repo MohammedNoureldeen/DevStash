@@ -1,4 +1,5 @@
 import { prisma } from '@/src/lib/prisma'
+import type { ItemWithType } from './items'
 
 export type FavoriteCollection = {
   id: string
@@ -18,6 +19,10 @@ export type CollectionWithDetails = {
     color: string
   }[]
   borderColor: string
+}
+
+export type CollectionDetail = CollectionWithDetails & {
+  items: ItemWithType[]
 }
 
 type RawCollection = {
@@ -87,4 +92,55 @@ export async function getFavoriteCollections(): Promise<FavoriteCollection[]> {
     orderBy: { updatedAt: 'desc' },
     select: { id: true, name: true },
   })
+}
+
+const collectionItemsInclude = {
+  items: {
+    include: {
+      item: {
+        include: {
+          itemType: true,
+          tags: { include: { tag: true } },
+        },
+      },
+    },
+  },
+} as const
+
+export async function getAllCollections(): Promise<CollectionWithDetails[]> {
+  const collections = await prisma.collection.findMany({
+    orderBy: { updatedAt: 'desc' },
+    include: collectionItemsInclude,
+  })
+  return collections.map(mapCollection)
+}
+
+export async function getCollectionById(id: string): Promise<CollectionDetail | null> {
+  const col = await prisma.collection.findUnique({
+    where: { id },
+    include: collectionItemsInclude,
+  })
+  if (!col) return null
+
+  const base = mapCollection(col)
+  const items: ItemWithType[] = col.items.map(({ item }) => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    contentType: item.contentType,
+    content: item.content,
+    url: item.url,
+    fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
+    language: item.language,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    createdAt: item.createdAt,
+    lastUsedAt: item.lastUsedAt,
+    itemType: item.itemType,
+    tags: item.tags.map((t) => t.tag.name),
+  }))
+
+  return { ...base, items }
 }
