@@ -1,10 +1,22 @@
-# Current Feature: Collection Create
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
+
+## Notes
+
+## History
+
+## Collection Create
+
+### Status
+
+Completed
+
+### Goals
 
 - Add `createCollection(userId, { name, description })` function to `src/lib/db/collections.ts`
 - Create `src/actions/collections.ts` with a Zod-validated `createCollection` server action (name required, description optional); follow `{ success, data, error }` pattern
@@ -13,14 +25,10 @@ In Progress
 - Update `DashboardShell` to hold `newCollectionOpen` state and render `<NewCollectionDialog>`
 - Collections are user-scoped: always pass `session.user.id` and scope DB queries to the authenticated user
 
-## Notes
+### History
 
-- Collection model: `id`, `name`, `description?`, `isFavorite` (default false), `userId` (required), `createdAt`, `updatedAt`
-- Follow same patterns as item create: server action in `src/actions/`, DB function in `src/lib/db/`, client dialog component in `src/components/collections/`
-- `DashboardShell` is the client wrapper that holds modal state — mirror how `newItemOpen` / `NewItemDialog` is wired up
-- No schema changes required; `Collection` model already has `userId` and `description?`
-
-## History
+- **2026-04-28** — Created branch `feature/collection-create`. Added `CreateCollectionData` type and `createCollection(userId, data)` to `src/lib/db/collections.ts` (user-scoped, returns `CollectionWithDetails`). Created `src/actions/collections.ts` (Zod: name required, description optional; `{ success, data, error }` pattern). Created `src/components/collections/NewCollectionDialog.tsx` (name + description fields, toast on success/failure, `router.refresh()` on save, Enter-key submit, resets on close). Added `onNewCollection` prop to `TopBar` with `FolderPlus` outline button alongside existing "New" button. Updated `DashboardShell` to hold `newCollectionOpen` state and render `<NewCollectionDialog>`. Installed shadcn `textarea` and `label` components. `tsc --noEmit` passes clean.
+- **2026-04-28** — Merged into main. Feature complete.
 
 ## Quick Wins — Security & Quality
 
