@@ -138,10 +138,10 @@ function ChangePasswordDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="w-full">
-        <Button variant="outline" className="w-full justify-start">
-          Change Password
-        </Button>
+      <DialogTrigger
+        render={<Button variant="outline" className="w-full justify-start" />}
+      >
+        Change Password
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -223,10 +223,15 @@ function DeleteAccountDialog() {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger className="w-full">
-        <Button variant="outline" className="w-full justify-start text-red-500 hover:text-red-500 hover:border-red-500">
-          Delete Account
-        </Button>
+      <DialogTrigger
+        render={
+          <Button
+            variant="outline"
+            className="w-full justify-start text-red-500 hover:text-red-500 hover:border-red-500"
+          />
+        }
+      >
+        Delete Account
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
