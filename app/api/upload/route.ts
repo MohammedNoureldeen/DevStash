@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { auth } from '@/src/auth'
-import { uploadToR2 } from '@/src/lib/r2'
+import { getPresignedUploadUrl } from '@/src/lib/r2'
 
 const IMAGE_MIME_TYPES = new Set([
   'image/png',
@@ -33,45 +33,34 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let formData: FormData
+  let body: { fileName: string; fileSize: number; mimeType: string }
   try {
-    formData = await req.formData()
+    body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const file = formData.get('file')
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+  const { fileName, fileSize, mimeType } = body
+  if (!fileName || typeof fileSize !== 'number' || !mimeType) {
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const isImage = IMAGE_MIME_TYPES.has(file.type)
-  const isFile = FILE_MIME_TYPES.has(file.type)
+  const isImage = IMAGE_MIME_TYPES.has(mimeType)
+  const isFile = FILE_MIME_TYPES.has(mimeType)
 
   if (!isImage && !isFile) {
-    return NextResponse.json({ error: `Unsupported file type: ${file.type}` }, { status: 400 })
+    return NextResponse.json({ error: `Unsupported file type: ${mimeType}` }, { status: 400 })
   }
 
   const maxBytes = isImage ? MAX_IMAGE_BYTES : MAX_FILE_BYTES
-  if (file.size > maxBytes) {
+  if (fileSize > maxBytes) {
     const maxMB = maxBytes / 1024 / 1024
     return NextResponse.json({ error: `File too large (max ${maxMB}MB)` }, { status: 400 })
   }
 
-  const ext = file.name.split('.').pop() ?? 'bin'
+  const ext = fileName.split('.').pop() ?? 'bin'
   const key = `${session.user.id}/${randomUUID()}.${ext}`
-  const buffer = Buffer.from(await file.arrayBuffer())
+  const uploadUrl = await getPresignedUploadUrl(key, mimeType)
 
-  try {
-    await uploadToR2(key, buffer, file.type)
-  } catch {
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
-  }
-
-  return NextResponse.json({
-    key,
-    fileName: file.name,
-    fileSize: file.size,
-    mimeType: file.type,
-  })
+  return NextResponse.json({ uploadUrl, key, fileName, fileSize, mimeType })
 }

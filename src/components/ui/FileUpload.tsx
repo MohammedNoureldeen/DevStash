@@ -70,11 +70,11 @@ export default function FileUpload({ itemType, value, onUpload }: FileUploadProp
     }
   }, [preview])
 
-  function startUpload(file: File) {
+  async function startUpload(file: File) {
     setError(null)
 
     if (!allowedMime.has(file.type)) {
-      setError(`Unsupported file type`)
+      setError('Unsupported file type')
       return
     }
     if (file.size > maxBytes) {
@@ -83,47 +83,63 @@ export default function FileUpload({ itemType, value, onUpload }: FileUploadProp
     }
 
     if (itemType === 'image') {
-      const url = URL.createObjectURL(file)
-      setPreview(url)
+      setPreview(URL.createObjectURL(file))
     }
 
     setUploading(true)
     setProgress(0)
 
-    const formData = new FormData()
-    formData.append('file', file)
+    try {
+      // Phase 1: get a presigned PUT URL from our API (tiny JSON body, no file)
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: file.name, fileSize: file.size, mimeType: file.type }),
+      })
 
-    const xhr = new XMLHttpRequest()
-    xhrRef.current = xhr
+      const data = await res.json() as { uploadUrl?: string; key?: string; fileName?: string; fileSize?: number; mimeType?: string; error?: string }
 
-    xhr.upload.addEventListener('progress', (e) => {
-      if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100))
-    })
-
-    xhr.onload = () => {
-      setUploading(false)
-      xhrRef.current = null
-      if (xhr.status === 200) {
-        const result: UploadResult = JSON.parse(xhr.responseText)
-        onUpload(result)
-      } else {
-        const body = JSON.parse(xhr.responseText) as { error?: string }
-        setError(body.error ?? 'Upload failed')
-        if (preview) {
-          URL.revokeObjectURL(preview)
-          setPreview(null)
-        }
+      if (!res.ok) {
+        throw new Error(data.error ?? 'Upload failed')
       }
-    }
 
-    xhr.onerror = () => {
+      const { uploadUrl, key, fileName, fileSize, mimeType } = data as Required<typeof data>
+
+      // Phase 2: PUT the file directly to R2 — bypasses Vercel entirely
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhrRef.current = xhr
+
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100))
+        })
+
+        xhr.onload = () => {
+          xhrRef.current = null
+          xhr.status < 300 ? resolve() : reject(new Error('Storage upload failed'))
+        }
+
+        xhr.onerror = () => {
+          xhrRef.current = null
+          reject(new Error('Upload failed'))
+        }
+
+        xhr.open('PUT', uploadUrl)
+        xhr.setRequestHeader('Content-Type', file.type)
+        xhr.send(file)
+      })
+
+      onUpload({ key, fileName, fileSize, mimeType })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed')
+      if (preview) {
+        URL.revokeObjectURL(preview)
+        setPreview(null)
+      }
+    } finally {
       setUploading(false)
       xhrRef.current = null
-      setError('Upload failed')
     }
-
-    xhr.open('POST', '/api/upload')
-    xhr.send(formData)
   }
 
   function handleClear() {
