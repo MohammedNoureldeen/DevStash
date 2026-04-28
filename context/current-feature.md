@@ -1,10 +1,24 @@
-# Current Feature: Item Create
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
+
+## Notes
+
+## History
+
+# Previous Features
+
+## Item Create
+
+### Status
+
+Completed
+
+### Goals
 
 - Use shadcn Dialog component, opened from "New Item" button in top bar
 - Type selector: snippet, prompt, command, note, link
@@ -17,14 +31,10 @@ In Progress
 - Query function `createItem` in `lib/db/items.ts`
 - Toast on success, close modal and refresh list
 
-## Notes
+### History
 
-- file and image types are PRO — exclude from the type selector for now
-- Reuse existing shadcn Dialog (already installed via Sheet dependency chain)
-
-## History
-
-# Previous Features
+- **2026-04-28** — Created branch `feature/item-create`. Added `CreateItemData` type, `createItem(userId, data)` query, and `getItemTypeByName(name)` helper to `src/lib/db/items.ts`. Added `createItem` server action to `src/actions/items.ts` (Zod validation, `CONTENT_TYPE_MAP` snippet/prompt/command/note→TEXT, link→URL, URL required+valid for link type). Created `src/components/items/NewItemDialog.tsx` (client: type selector buttons, shared fields title/description/tags, conditional content for non-link types, language for snippet/command, URL for link, resets on close, toast + router.refresh on success). Updated `src/components/dashboard/TopBar.tsx` with `onNewItem` prop wired to "New" button. Updated `src/components/dashboard/DashboardShell.tsx` to hold `newItemOpen` state and render `<NewItemDialog>`. `tsc --noEmit` passes clean.
+- **2026-04-28** — Merged into main. Feature complete.
 
 ## Item Drawer
 
