@@ -4,7 +4,7 @@ import { useState } from 'react'
 import {
   Code, Sparkles, StickyNote, Terminal,
   Link as LinkIcon, File, FileText, Image,
-  Star, Download,
+  Star, Download, Copy, Check,
 } from 'lucide-react'
 import type { ItemWithType } from '@/src/lib/db/items'
 import ItemDrawer from './ItemDrawer'
@@ -90,13 +90,28 @@ function FileListRow({ item, onClick }: { item: ItemWithType; onClick: () => voi
 
 function ItemCard({ item, onClick }: { item: ItemWithType; onClick: () => void }) {
   const Icon = ICON_MAP[item.itemType.icon] ?? File
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy(e: React.MouseEvent) {
+    e.stopPropagation()
+    const text = item.content ?? item.url ?? item.title
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
 
   return (
     <div
-      className="glass-card hover-lift rounded-xl p-4 cursor-pointer group border-l-4"
+      className="glass-card hover-lift rounded-xl p-4 cursor-pointer group border-l-4 relative"
       style={{ borderLeftColor: item.itemType.color }}
       onClick={onClick}
     >
+      <button
+        onClick={handleCopy}
+        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
+      >
+        {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+      </button>
       <div className="flex items-start gap-3">
         <div
           className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
@@ -104,7 +119,7 @@ function ItemCard({ item, onClick }: { item: ItemWithType; onClick: () => void }
         >
           <Icon className="h-4 w-4" style={{ color: item.itemType.color }} />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pr-6">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-foreground truncate">{item.title}</span>
             {item.isFavorite && <Star className="h-3.5 w-3.5 shrink-0 text-amber-400 fill-amber-400" />}
