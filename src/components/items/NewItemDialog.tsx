@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Code, Sparkles, StickyNote, Terminal, Link as LinkIcon } from 'lucide-react'
 import { createItem } from '@/src/actions/items'
 import CodeEditor from '@/src/components/ui/CodeEditor'
+import MarkdownEditor from '@/src/components/ui/MarkdownEditor'
 
 const ITEM_TYPES = [
   { name: 'snippet', label: 'Snippet', icon: Code },
@@ -28,6 +29,7 @@ type ItemTypeName = (typeof ITEM_TYPES)[number]['name']
 
 const CONTENT_TYPES = new Set<ItemTypeName>(['snippet', 'prompt', 'command', 'note'])
 const LANGUAGE_TYPES = new Set<ItemTypeName>(['snippet', 'command'])
+const MARKDOWN_TYPES = new Set<ItemTypeName>(['note', 'prompt'])
 
 const DEFAULT_FORM = {
   title: '',
@@ -93,6 +95,7 @@ export default function NewItemDialog({
 
   const showContent = CONTENT_TYPES.has(type)
   const showLanguage = LANGUAGE_TYPES.has(type)
+  const showMarkdown = MARKDOWN_TYPES.has(type)
   const showUrl = type === 'link'
   const isValid =
     form.title.trim().length > 0 && (type !== 'link' || form.url.trim().length > 0)
@@ -177,6 +180,11 @@ export default function NewItemDialog({
                   value={form.content}
                   onChange={(val) => setForm(f => ({ ...f, content: val }))}
                   language={form.language}
+                />
+              ) : showMarkdown ? (
+                <MarkdownEditor
+                  value={form.content}
+                  onChange={(val) => setForm(f => ({ ...f, content: val }))}
                 />
               ) : (
                 <textarea

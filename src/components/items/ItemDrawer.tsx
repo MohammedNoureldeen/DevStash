@@ -26,6 +26,7 @@ import {
 import type { ItemWithType } from '@/src/lib/db/items'
 import { updateItem } from '@/src/actions/items'
 import CodeEditor from '@/src/components/ui/CodeEditor'
+import MarkdownEditor from '@/src/components/ui/MarkdownEditor'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Code,
@@ -40,6 +41,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 const CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note'])
 const LANGUAGE_TYPES = new Set(['snippet', 'command'])
 const CODE_TYPES = new Set(['snippet', 'command'])
+const MARKDOWN_TYPES = new Set(['note', 'prompt'])
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`rounded-md bg-muted animate-pulse ${className ?? ''}`} />
@@ -198,6 +200,7 @@ export default function ItemDrawer({
   const showContent = CONTENT_TYPES.has(typeName)
   const showLanguage = LANGUAGE_TYPES.has(typeName)
   const showCode = CODE_TYPES.has(typeName)
+  const showMarkdown = MARKDOWN_TYPES.has(typeName)
   const showUrl = typeName === 'link'
 
   return (
@@ -376,6 +379,11 @@ export default function ItemDrawer({
                         onChange={(val) => setForm(f => ({ ...f, content: val }))}
                         language={form.language}
                       />
+                    ) : showMarkdown ? (
+                      <MarkdownEditor
+                        value={form.content}
+                        onChange={(val) => setForm(f => ({ ...f, content: val }))}
+                      />
                     ) : (
                       <textarea
                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
@@ -505,6 +513,8 @@ export default function ItemDrawer({
                         language={item.language ?? ''}
                         readOnly
                       />
+                    ) : showMarkdown ? (
+                      <MarkdownEditor value={item.content} readOnly />
                     ) : (
                       <div className="rounded-lg bg-muted/50 border border-border p-3 overflow-x-auto">
                         <pre className="text-sm text-foreground whitespace-pre-wrap break-words font-mono">
