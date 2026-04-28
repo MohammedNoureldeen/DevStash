@@ -1,10 +1,22 @@
-# Current Feature: Code Editor
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
+
+## Notes
+
+## History
+
+## Code Editor
+
+### Status
+
+Completed
+
+### Goals
 
 - Create `CodeEditor` component using Monaco Editor with dark theme
 - Replace Textarea with `CodeEditor` for snippets and commands only; keep Textarea for notes, prompts, and other non-code types
@@ -14,12 +26,10 @@ In Progress
 - Support both display (readonly) and edit modes
 - Make editor height fluid with a max height of 400px and a styled scrollbar matching the theme
 
-## Notes
+### History
 
-- Source spec: `context/features/code-editor-spec.md`
-- Only snippet and command item types should use `CodeEditor`; all other types remain with Textarea
-
-## History
+- **2026-04-28** — Created branch `feature/code-editor`. Installed `@monaco-editor/react`. Created `src/components/ui/CodeEditor.tsx` (macOS traffic-light dots, language label, copy button with check feedback, Monaco Editor with `vs-dark` theme, no minimap, word wrap, fluid height via `onDidContentSizeChange` min 100px max 360px, 6px themed scrollbar, readonly mode with line numbers off). Updated `src/components/items/ItemDrawer.tsx`: display mode replaces `<pre>` block with `<CodeEditor readOnly>` for snippet/command; edit mode replaces content textarea with `<CodeEditor onChange>`. Updated `src/components/items/NewItemDialog.tsx`: snippet/command content textarea replaced with `<CodeEditor onChange>`. Notes, prompts, and links keep plain textarea. `tsc --noEmit` passes clean.
+- **2026-04-28** — Merged into main. Feature complete.
 
 # Previous Features
 
