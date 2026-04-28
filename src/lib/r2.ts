@@ -13,6 +13,9 @@ export const r2 = new S3Client({
     accessKeyId: process.env.R2_ACCESS_KEY_ID!,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
   },
+  // R2 does not support the CRC32 checksum headers SDK v3.679+ adds by default
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
 })
 
 export const R2_BUCKET = process.env.R2_BUCKET_NAME!

@@ -58,11 +58,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `File too large (max ${maxMB}MB)` }, { status: 400 })
   }
 
-  const missingVars = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME']
-    .filter((v) => !process.env[v])
+  const R2_VARS = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME'] as const
+  const missingVars = R2_VARS.filter((v) => !process.env[v])
   if (missingVars.length > 0) {
+    console.error(
+      '[upload] Missing R2 env vars:',
+      missingVars.join(', '),
+      '| Present:',
+      R2_VARS.filter((v) => !!process.env[v]).join(', ') || 'none',
+    )
     return NextResponse.json(
-      { error: `R2 not configured. Missing: ${missingVars.join(', ')}` },
+      { error: `R2 not configured. Missing env vars: ${missingVars.join(', ')}` },
       { status: 500 },
     )
   }
