@@ -8,6 +8,9 @@ export type ItemWithType = {
   contentType: string
   content: string | null
   url: string | null
+  fileUrl: string | null
+  fileName: string | null
+  fileSize: number | null
   language: string | null
   isFavorite: boolean
   isPinned: boolean
@@ -28,6 +31,9 @@ export type CreateItemData = {
   contentType: ContentType
   content: string | null
   url: string | null
+  fileUrl: string | null
+  fileName: string | null
+  fileSize: number | null
   language: string | null
   itemTypeId: string
   tags: string[]
@@ -61,6 +67,9 @@ function mapItem(item: {
   contentType: string
   content: string | null
   url: string | null
+  fileUrl: string | null
+  fileName: string | null
+  fileSize: number | null
   language: string | null
   isFavorite: boolean
   isPinned: boolean
@@ -76,6 +85,9 @@ function mapItem(item: {
     contentType: item.contentType,
     content: item.content,
     url: item.url,
+    fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
     language: item.language,
     isFavorite: item.isFavorite,
     isPinned: item.isPinned,
@@ -194,6 +206,9 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
       contentType: data.contentType,
       content: data.content,
       url: data.url,
+      fileUrl: data.fileUrl,
+      fileName: data.fileName,
+      fileSize: data.fileSize,
       language: data.language,
       userId,
       itemTypeId: data.itemTypeId,

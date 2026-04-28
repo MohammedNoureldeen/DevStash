@@ -10,8 +10,8 @@ import {
 import type { ItemWithType } from '@/src/lib/db/items'
 import type { ContentType } from '@/generated/prisma/client'
 
-const ALLOWED_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const
-type AllowedType = typeof ALLOWED_TYPES[number]
+const ALLOWED_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
+type AllowedType = (typeof ALLOWED_TYPES)[number]
 
 const CONTENT_TYPE_MAP: Record<AllowedType, ContentType> = {
   snippet: 'TEXT',
@@ -19,6 +19,8 @@ const CONTENT_TYPE_MAP: Record<AllowedType, ContentType> = {
   command: 'TEXT',
   note: 'TEXT',
   link: 'URL',
+  file: 'FILE',
+  image: 'FILE',
 }
 
 const createItemSchema = z
@@ -29,6 +31,9 @@ const createItemSchema = z
     content: z.string().optional(),
     language: z.string().optional(),
     url: z.string().optional(),
+    fileKey: z.string().optional(),
+    fileName: z.string().optional(),
+    fileSize: z.number().optional(),
     tags: z.array(z.string().trim().min(1)).optional().default([]),
   })
   .superRefine((data, ctx) => {
@@ -46,6 +51,15 @@ const createItemSchema = z
         }
       }
     }
+    if (data.type === 'file' || data.type === 'image') {
+      if (!data.fileKey?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'File is required',
+          path: ['fileKey'],
+        })
+      }
+    }
   })
 
 type CreateItemResult =
@@ -59,7 +73,8 @@ export async function createItem(payload: unknown): Promise<CreateItemResult> {
   const parsed = createItemSchema.safeParse(payload)
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
 
-  const { type, title, description, content, language, url, tags } = parsed.data
+  const { type, title, description, content, language, url, fileKey, fileName, fileSize, tags } =
+    parsed.data
 
   const itemType = await getItemTypeByName(type)
   if (!itemType) return { success: false, error: 'Invalid item type' }
@@ -71,6 +86,9 @@ export async function createItem(payload: unknown): Promise<CreateItemResult> {
       contentType: CONTENT_TYPE_MAP[type],
       content: content?.trim() || null,
       url: url?.trim() || null,
+      fileUrl: fileKey ?? null,
+      fileName: fileName ?? null,
+      fileSize: fileSize ?? null,
       language: language?.trim() || null,
       itemTypeId: itemType.id,
       tags: tags ?? [],
