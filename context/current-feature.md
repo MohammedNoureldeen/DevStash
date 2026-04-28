@@ -1,10 +1,22 @@
-# Current Feature: File List View
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
+
+## Notes
+
+## History
+
+## File List View
+
+### Status
+
+Completed
+
+### Goals
 
 - Single-column list layout with rows (like Google Drive/Dropbox) for `/items/files`
 - Each row shows: file icon (by extension), file name, file size, upload date, download button
@@ -13,12 +25,10 @@ In Progress
 - Download button triggers direct download (stop propagation)
 - Responsive: stack info vertically on mobile
 
-## Notes
+### History
 
-- Replace the current grid/card layout only for the `files` type (not images or other types)
-- Spec source: `context/features/file-display-spec.md`
-
-## History
+- **2026-04-28** — Created branch `feature/file-list-view`. Added `FileListRow` component to `src/components/items/ItemsListContent.tsx` (file icon by extension via `getFileIcon` helper — `FileText` for pdf/doc/txt/csv/md/etc., `File` as default; row shows `fileName ?? title`, description, `formatBytes(fileSize)`, `formatDate(createdAt)`, download `<a>` with `stopPropagation`; desktop: size + date inline via `hidden sm:flex`; mobile: stacked below name via `sm:hidden`; hover `bg-secondary/50`). Added `isFileList` flag (`typeLabel === 'files'`) to render rows inside `glass-card` with `divide-y divide-border` instead of the grid. Images and all other types unchanged. `tsc --noEmit` passes clean.
+- **2026-04-28** — Merged into main. Feature complete.
 
 ## Image Gallery View
 
