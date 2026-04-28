@@ -6,6 +6,7 @@ export type ItemWithType = {
   description: string | null
   contentType: string
   content: string | null
+  url: string | null
   language: string | null
   isFavorite: boolean
   isPinned: boolean
@@ -17,6 +18,15 @@ export type ItemWithType = {
     icon: string
     color: string
   }
+  tags: string[]
+}
+
+export type UpdateItemData = {
+  title: string
+  description: string | null
+  content: string | null
+  url: string | null
+  language: string | null
   tags: string[]
 }
 
@@ -38,6 +48,7 @@ function mapItem(item: {
   description: string | null
   contentType: string
   content: string | null
+  url: string | null
   language: string | null
   isFavorite: boolean
   isPinned: boolean
@@ -52,6 +63,7 @@ function mapItem(item: {
     description: item.description,
     contentType: item.contentType,
     content: item.content,
+    url: item.url,
     language: item.language,
     isFavorite: item.isFavorite,
     isPinned: item.isPinned,
@@ -118,6 +130,36 @@ export async function getItemById(id: string, userId: string): Promise<ItemWithT
     include: itemWithTypeInclude,
   })
   if (!item) return null
+  return mapItem(item)
+}
+
+export async function updateItem(
+  id: string,
+  userId: string,
+  data: UpdateItemData,
+): Promise<ItemWithType> {
+  const item = await prisma.item.update({
+    where: { id, userId },
+    data: {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      tags: {
+        deleteMany: {},
+        create: data.tags.map((tagName) => ({
+          tag: {
+            connectOrCreate: {
+              where: { name: tagName },
+              create: { name: tagName },
+            },
+          },
+        })),
+      },
+    },
+    include: itemWithTypeInclude,
+  })
   return mapItem(item)
 }
 
