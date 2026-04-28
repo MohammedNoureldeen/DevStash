@@ -12,10 +12,19 @@ import {
   DialogClose,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Code, Sparkles, StickyNote, Terminal, Link as LinkIcon } from 'lucide-react'
+import {
+  Code,
+  Sparkles,
+  StickyNote,
+  Terminal,
+  Link as LinkIcon,
+  File as FileIcon,
+  Image as ImageIcon,
+} from 'lucide-react'
 import { createItem } from '@/src/actions/items'
 import CodeEditor from '@/src/components/ui/CodeEditor'
 import MarkdownEditor from '@/src/components/ui/MarkdownEditor'
+import FileUpload, { type UploadResult } from '@/src/components/ui/FileUpload'
 
 const ITEM_TYPES = [
   { name: 'snippet', label: 'Snippet', icon: Code },
@@ -23,6 +32,8 @@ const ITEM_TYPES = [
   { name: 'command', label: 'Command', icon: Terminal },
   { name: 'note', label: 'Note', icon: StickyNote },
   { name: 'link', label: 'Link', icon: LinkIcon },
+  { name: 'file', label: 'File', icon: FileIcon },
+  { name: 'image', label: 'Image', icon: ImageIcon },
 ] as const
 
 type ItemTypeName = (typeof ITEM_TYPES)[number]['name']
@@ -30,6 +41,7 @@ type ItemTypeName = (typeof ITEM_TYPES)[number]['name']
 const CONTENT_TYPES = new Set<ItemTypeName>(['snippet', 'prompt', 'command', 'note'])
 const LANGUAGE_TYPES = new Set<ItemTypeName>(['snippet', 'command'])
 const MARKDOWN_TYPES = new Set<ItemTypeName>(['note', 'prompt'])
+const UPLOAD_TYPES = new Set<ItemTypeName>(['file', 'image'])
 
 const DEFAULT_FORM = {
   title: '',
@@ -51,11 +63,13 @@ export default function NewItemDialog({
   const [isPending, startTransition] = useTransition()
   const [type, setType] = useState<ItemTypeName>('snippet')
   const [form, setForm] = useState(DEFAULT_FORM)
+  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
 
   function handleOpenChange(isOpen: boolean) {
     if (!isOpen) {
       setForm(DEFAULT_FORM)
       setType('snippet')
+      setUploadResult(null)
     }
     onOpenChange(isOpen)
   }
@@ -63,6 +77,7 @@ export default function NewItemDialog({
   function handleTypeChange(newType: ItemTypeName) {
     setType(newType)
     setForm(f => ({ ...f, content: '', language: '', url: '' }))
+    setUploadResult(null)
   }
 
   function handleSubmit() {
@@ -79,6 +94,9 @@ export default function NewItemDialog({
         content: form.content.trim() || undefined,
         language: form.language.trim() || undefined,
         url: form.url.trim() || undefined,
+        fileKey: uploadResult?.key,
+        fileName: uploadResult?.fileName,
+        fileSize: uploadResult?.fileSize,
         tags,
       })
 
@@ -97,8 +115,12 @@ export default function NewItemDialog({
   const showLanguage = LANGUAGE_TYPES.has(type)
   const showMarkdown = MARKDOWN_TYPES.has(type)
   const showUrl = type === 'link'
+  const showUpload = UPLOAD_TYPES.has(type)
+
   const isValid =
-    form.title.trim().length > 0 && (type !== 'link' || form.url.trim().length > 0)
+    form.title.trim().length > 0 &&
+    (type !== 'link' || form.url.trim().length > 0) &&
+    (!showUpload || uploadResult !== null)
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -168,6 +190,21 @@ export default function NewItemDialog({
               placeholder="react, typescript (comma-separated)"
             />
           </div>
+
+          {/* File / Image upload */}
+          {showUpload && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                {type === 'image' ? 'Image' : 'File'}{' '}
+                <span className="text-destructive">*</span>
+              </label>
+              <FileUpload
+                itemType={type as 'file' | 'image'}
+                value={uploadResult}
+                onUpload={setUploadResult}
+              />
+            </div>
+          )}
 
           {/* Content */}
           {showContent && (

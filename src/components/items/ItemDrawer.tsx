@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import {
-  Star, Pin, Copy, Pencil, Trash2, X, Check,
+  Star, Pin, Copy, Pencil, Trash2, X, Check, Download,
   Code, Sparkles, StickyNote, Terminal,
   Link as LinkIcon, File, Image,
 } from 'lucide-react'
@@ -42,6 +42,13 @@ const CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note'])
 const LANGUAGE_TYPES = new Set(['snippet', 'command'])
 const CODE_TYPES = new Set(['snippet', 'command'])
 const MARKDOWN_TYPES = new Set(['note', 'prompt'])
+const UPLOAD_TYPES = new Set(['file', 'image'])
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`rounded-md bg-muted animate-pulse ${className ?? ''}`} />
@@ -202,6 +209,8 @@ export default function ItemDrawer({
   const showCode = CODE_TYPES.has(typeName)
   const showMarkdown = MARKDOWN_TYPES.has(typeName)
   const showUrl = typeName === 'link'
+  const showFile = UPLOAD_TYPES.has(typeName) && !!item?.fileUrl
+  const fileProxyUrl = item?.fileUrl ? `/api/files/${item.fileUrl}` : null
 
   return (
     <>
@@ -426,6 +435,22 @@ export default function ItemDrawer({
                   </div>
                 )}
 
+                {/* File (non-editable in edit mode) */}
+                {showFile && item.fileName && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      {typeName === 'image' ? 'Image' : 'File'}
+                    </label>
+                    <div className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-muted-foreground">
+                      <File className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{item.fileName}</span>
+                      {item.fileSize != null && (
+                        <span className="ml-auto shrink-0">{formatBytes(item.fileSize)}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Dates — non-editable */}
                 <div className="border-t border-border pt-4 flex flex-col gap-1.5">
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -498,6 +523,60 @@ export default function ItemDrawer({
                     >
                       {item.url}
                     </a>
+                  </div>
+                )}
+
+                {/* File / Image */}
+                {showFile && fileProxyUrl && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                      {typeName === 'image' ? 'Image' : 'File'}
+                    </p>
+                    {typeName === 'image' ? (
+                      <div className="flex flex-col gap-2">
+                        <img
+                          src={fileProxyUrl}
+                          alt={item.fileName ?? 'Image'}
+                          className="w-full rounded-lg border border-border object-contain max-h-64"
+                        />
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="text-sm text-foreground truncate">{item.fileName}</span>
+                            {item.fileSize != null && (
+                              <span className="text-xs text-muted-foreground">{formatBytes(item.fileSize)}</span>
+                            )}
+                          </div>
+                          <a
+                            href={fileProxyUrl}
+                            download={item.fileName ?? true}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm bg-secondary text-foreground hover:bg-secondary/80 transition-colors"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            Download
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 rounded-lg border border-border bg-[#1e1e1e] p-3">
+                        <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                          <File className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-foreground truncate">{item.fileName}</p>
+                          {item.fileSize != null && (
+                            <p className="text-xs text-muted-foreground">{formatBytes(item.fileSize)}</p>
+                          )}
+                        </div>
+                        <a
+                          href={fileProxyUrl}
+                          download={item.fileName ?? true}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm bg-secondary text-foreground hover:bg-secondary/80 transition-colors shrink-0"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          Download
+                        </a>
+                      </div>
+                    )}
                   </div>
                 )}
 
