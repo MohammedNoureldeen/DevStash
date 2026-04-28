@@ -8,9 +8,13 @@ import { PrismaClient } from "../../generated/prisma/client";
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 function createPrismaClient() {
-  const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL!,
-  });
+  // pg is changing sslmode=require to mean "no cert verification" (libpq compat).
+  // Neon has valid certs, so use verify-full to keep the current verified behavior.
+  const connectionString = (process.env.DATABASE_URL ?? "").replace(
+    "sslmode=require",
+    "sslmode=verify-full"
+  );
+  const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter });
 }
 
