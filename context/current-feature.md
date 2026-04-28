@@ -10,6 +10,26 @@ Not Started
 
 ## History
 
+## Quick Wins — Security & Quality
+
+### Status
+
+Completed
+
+### Goals
+
+- Extract bcrypt salt rounds into shared constant
+- Debounce ItemDrawer fetch + res.ok guard
+- Auto-prepend https:// to link URLs; close open redirect on callbackUrl
+- Zod validation for register and change-password API routes
+- Replace `<img>` with `next/image` in gallery and drawer
+- Upload rate limiting (20 req / 1 h per user)
+
+### History
+
+- **2026-04-28** — Created branch `feature/quick-wins-security-quality`. Created `src/lib/password.ts` (`BCRYPT_ROUNDS = 12`, `hashPassword`, `verifyPassword`); removed direct `bcryptjs` imports from `app/api/register/route.ts`, `app/api/auth/reset-password/route.ts`, `app/api/profile/change-password/route.ts`, and `src/auth.ts`. Debounced `ItemDrawer` fetch `useEffect` by 150 ms with `setTimeout`/`clearTimeout` cleanup; added `res.ok` guard before JSON cast. Added `normalizeUrl` (prepends `https://` when no protocol present) to `NewItemDialog.tsx` and `ItemDrawer.tsx` save path; validated `callbackUrl` starts with `/` in `app/sign-in/page.tsx`. Replaced raw `as` casts with Zod schemas in `app/api/register/route.ts` (name/email/password/confirmPassword with `refine` for match) and `app/api/profile/change-password/route.ts`. Replaced `<img>` with `<NextImage fill>` in `ImageThumbnailCard` (parent gains `relative`) and `ItemDrawer` image preview; inlined conditional `FileText`/`File` icon in `FileListRow` to fix dynamic component-during-render lint error. Added `uploadLimiter` (20 req / 1 h, keyed by `userId`) to `src/lib/rate-limit.ts`; applied in `app/api/upload/route.ts` after auth check. `tsc --noEmit` passes clean.
+- **2026-04-28** — Merged into main. Feature complete.
+
 ## File List View
 
 ### Status
