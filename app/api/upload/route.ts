@@ -64,7 +64,8 @@ export async function POST(req: Request) {
   let uploadUrl: string
   try {
     uploadUrl = await getPresignedUploadUrl(key, mimeType)
-  } catch {
+  } catch (err) {
+    console.error('[upload] getPresignedUploadUrl failed:', err)
     return NextResponse.json({ error: 'Failed to generate upload URL' }, { status: 500 })
   }
 
