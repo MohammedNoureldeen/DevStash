@@ -60,7 +60,13 @@ export async function POST(req: Request) {
 
   const ext = fileName.split('.').pop() ?? 'bin'
   const key = `${session.user.id}/${randomUUID()}.${ext}`
-  const uploadUrl = await getPresignedUploadUrl(key, mimeType)
+
+  let uploadUrl: string
+  try {
+    uploadUrl = await getPresignedUploadUrl(key, mimeType)
+  } catch {
+    return NextResponse.json({ error: 'Failed to generate upload URL' }, { status: 500 })
+  }
 
   return NextResponse.json({ uploadUrl, key, fileName, fileSize, mimeType })
 }

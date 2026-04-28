@@ -97,10 +97,11 @@ export default function FileUpload({ itemType, value, onUpload }: FileUploadProp
         body: JSON.stringify({ fileName: file.name, fileSize: file.size, mimeType: file.type }),
       })
 
-      const data = await res.json() as { uploadUrl?: string; key?: string; fileName?: string; fileSize?: number; mimeType?: string; error?: string }
+      const text = await res.text()
+      const data = text ? (JSON.parse(text) as { uploadUrl?: string; key?: string; fileName?: string; fileSize?: number; mimeType?: string; error?: string }) : {}
 
       if (!res.ok) {
-        throw new Error(data.error ?? 'Upload failed')
+        throw new Error((data as { error?: string }).error ?? `Server error (${res.status})`)
       }
 
       const { uploadUrl, key, fileName, fileSize, mimeType } = data as Required<typeof data>
