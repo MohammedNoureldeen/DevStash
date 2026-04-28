@@ -7,6 +7,16 @@ import {
   Sheet,
   SheetContent,
 } from '@/components/ui/sheet'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import {
   Star, Pin, Copy, Pencil, Trash2, X, Check,
@@ -90,6 +100,8 @@ export default function ItemDrawer({
   const [copied, setCopied] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [form, setForm] = useState<EditForm>({
     title: '',
     description: '',
@@ -162,6 +174,23 @@ export default function ItemDrawer({
     router.refresh()
   }
 
+  async function handleDelete() {
+    if (!item) return
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/items/${item.id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      toast.success('Item deleted')
+      onClose()
+      router.refresh()
+    } catch {
+      toast.error('Failed to delete item')
+    } finally {
+      setIsDeleting(false)
+      setDeleteDialogOpen(false)
+    }
+  }
+
   const Icon = item ? (ICON_MAP[item.itemType.icon] ?? File) : File
   const typeName = item?.itemType.name ?? ''
   const showContent = CONTENT_TYPES.has(typeName)
@@ -169,6 +198,27 @@ export default function ItemDrawer({
   const showUrl = typeName === 'link'
 
   return (
+    <>
+    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete item?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete &ldquo;{item?.title}&rdquo;. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {isDeleting ? 'Deleting…' : 'Delete'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <SheetContent
         side="right"
@@ -234,6 +284,8 @@ export default function ItemDrawer({
                   size="icon-sm"
                   title="Delete"
                   className="text-destructive hover:text-destructive"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  disabled={!item}
                 >
                   <Trash2 />
                 </Button>
@@ -475,5 +527,6 @@ export default function ItemDrawer({
         </div>
       </SheetContent>
     </Sheet>
+    </>
   )
 }

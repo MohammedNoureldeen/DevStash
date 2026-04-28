@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/src/auth'
-import { getItemById } from '@/src/lib/db/items'
+import { getItemById, deleteItem } from '@/src/lib/db/items'
 
 export async function GET(
   _req: Request,
@@ -18,4 +18,23 @@ export async function GET(
   }
 
   return NextResponse.json(item)
+}
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { id } = await params
+  const item = await getItemById(id, session.user.id)
+  if (!item) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
+  await deleteItem(id, session.user.id)
+  return new NextResponse(null, { status: 204 })
 }

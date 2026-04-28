@@ -163,6 +163,10 @@ export async function updateItem(
   return mapItem(item)
 }
 
+export async function deleteItem(id: string, userId: string): Promise<void> {
+  await prisma.item.delete({ where: { id, userId } })
+}
+
 export async function getItemTypesWithCounts(): Promise<ItemTypeWithCount[]> {
   const types = await prisma.itemType.findMany({
     where: { name: { in: [...SYSTEM_TYPE_ORDER] } },
