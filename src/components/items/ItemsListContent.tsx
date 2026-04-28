@@ -6,6 +6,7 @@ import {
   Link as LinkIcon, File, FileText, Image,
   Star, Download, Copy, Check,
 } from 'lucide-react'
+import NextImage from 'next/image'
 import type { ItemWithType } from '@/src/lib/db/items'
 import ItemDrawer from './ItemDrawer'
 
@@ -31,14 +32,12 @@ function formatBytes(bytes: number): string {
 
 const TEXT_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'txt', 'rtf', 'md', 'csv', 'log'])
 
-function getFileIcon(fileName: string | null): React.ElementType {
-  if (!fileName) return File
-  const ext = fileName.split('.').pop()?.toLowerCase() ?? ''
-  return TEXT_EXTENSIONS.has(ext) ? FileText : File
+function isTextFile(fileName: string | null): boolean {
+  if (!fileName) return false
+  return TEXT_EXTENSIONS.has(fileName.split('.').pop()?.toLowerCase() ?? '')
 }
 
 function FileListRow({ item, onClick }: { item: ItemWithType; onClick: () => void }) {
-  const FileIcon = getFileIcon(item.fileName)
   const fileProxyUrl = item.fileUrl ? `/api/files/${item.fileUrl}` : null
 
   return (
@@ -47,7 +46,9 @@ function FileListRow({ item, onClick }: { item: ItemWithType; onClick: () => voi
       onClick={onClick}
     >
       <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-secondary shrink-0">
-        <FileIcon className="h-4 w-4 text-muted-foreground" />
+        {isTextFile(item.fileName)
+          ? <FileText className="h-4 w-4 text-muted-foreground" />
+          : <File className="h-4 w-4 text-muted-foreground" />}
       </div>
 
       <div className="flex-1 min-w-0">
@@ -149,12 +150,13 @@ function ImageThumbnailCard({ item, onClick }: { item: ItemWithType; onClick: ()
       className="glass-card rounded-xl overflow-hidden cursor-pointer group"
       onClick={onClick}
     >
-      <div className="aspect-video overflow-hidden bg-secondary">
+      <div className="relative aspect-video overflow-hidden bg-secondary">
         {item.fileUrl ? (
-          <img
+          <NextImage
             src={`/api/files/${item.fileUrl}`}
             alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

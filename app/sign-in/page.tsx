@@ -10,8 +10,8 @@ type SignInPageProps = {
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   const { callbackUrl, verified, reset } = await searchParams
-  const resolvedCallbackUrl =
-    typeof callbackUrl === 'string' ? callbackUrl : callbackUrl?.[0] ?? '/dashboard'
+  const raw = typeof callbackUrl === 'string' ? callbackUrl : callbackUrl?.[0]
+  const resolvedCallbackUrl = typeof raw === 'string' && raw.startsWith('/') ? raw : '/dashboard'
 
   return (
     <SignInForm

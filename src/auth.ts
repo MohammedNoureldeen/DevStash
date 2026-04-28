@@ -1,10 +1,10 @@
 import NextAuth, { CredentialsSignin } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
 import { prisma } from "@/src/lib/prisma";
 import { authConfig } from "./auth.config";
 import { loginLimiter, getIP, rateLimit } from "./lib/rate-limit";
+import { verifyPassword } from "./lib/password";
 
 class RateLimitError extends CredentialsSignin {
   code = "rate_limit"
@@ -46,7 +46,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!user?.password) return null;
 
-        const isValid = await bcrypt.compare(
+        const isValid = await verifyPassword(
           credentials.password as string,
           user.password
         );

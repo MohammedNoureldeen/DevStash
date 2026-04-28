@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { auth } from '@/src/auth'
 import { getPresignedUploadUrl } from '@/src/lib/r2'
+import { uploadLimiter, rateLimit } from '@/src/lib/rate-limit'
 
 const IMAGE_MIME_TYPES = new Set([
   'image/png',
@@ -32,6 +33,9 @@ export async function POST(req: Request) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const { limited, response } = await rateLimit(uploadLimiter, session.user.id)
+  if (limited) return response!
 
   let body: { fileName: string; fileSize: number; mimeType: string }
   try {
