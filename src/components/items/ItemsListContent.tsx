@@ -63,6 +63,38 @@ function ItemCard({ item, onClick }: { item: ItemWithType; onClick: () => void }
   )
 }
 
+function ImageThumbnailCard({ item, onClick }: { item: ItemWithType; onClick: () => void }) {
+  return (
+    <div
+      className="glass-card rounded-xl overflow-hidden cursor-pointer group"
+      onClick={onClick}
+    >
+      <div className="aspect-video overflow-hidden bg-secondary">
+        {item.fileUrl ? (
+          <img
+            src={`/api/files/${item.fileUrl}`}
+            alt={item.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Image className="h-8 w-8 text-muted-foreground" />
+          </div>
+        )}
+      </div>
+      <div className="p-3">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm font-semibold text-foreground truncate">{item.title}</span>
+          {item.isFavorite && <Star className="h-3.5 w-3.5 shrink-0 text-amber-400 fill-amber-400" />}
+        </div>
+        {item.description && (
+          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{item.description}</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function ItemsListContent({
   items,
   typeLabel,
@@ -73,6 +105,7 @@ export default function ItemsListContent({
   typeColor: string
 }) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
+  const isImageGallery = typeLabel === 'images'
 
   return (
     <>
@@ -87,6 +120,16 @@ export default function ItemsListContent({
         {items.length === 0 ? (
           <div className="glass-card rounded-xl p-12 text-center">
             <p className="text-muted-foreground">No {typeLabel.toLowerCase()} yet.</p>
+          </div>
+        ) : isImageGallery ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {items.map(item => (
+              <ImageThumbnailCard
+                key={item.id}
+                item={item}
+                onClick={() => setSelectedItemId(item.id)}
+              />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
