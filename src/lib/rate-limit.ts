@@ -37,6 +37,12 @@ export const resendVerificationLimiter = new Ratelimit({
   prefix: 'rl:resend-verification',
 })
 
+export const uploadLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(20, '1 h'),
+  prefix: 'rl:upload',
+})
+
 export function getIP(req: Request): string {
   const forwarded = req.headers.get('x-forwarded-for')
   return forwarded?.split(',')[0].trim() ?? 'anonymous'

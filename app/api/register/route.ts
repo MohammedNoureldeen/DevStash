@@ -1,29 +1,35 @@
-import bcrypt from 'bcryptjs'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { prisma } from '@/src/lib/prisma'
 import { sendVerificationEmail } from '@/src/lib/email'
 import { registerLimiter, getIP, rateLimit } from '@/src/lib/rate-limit'
+import { hashPassword } from '@/src/lib/password'
+
+const registerSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Name is required'),
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  })
 
 export async function POST(request: Request) {
   const { limited, response } = await rateLimit(registerLimiter, getIP(request))
   if (limited) return response!
 
   try {
-    const { name, email, password, confirmPassword } = await request.json() as {
-      name: string
-      email: string
-      password: string
-      confirmPassword: string
+    const parsed = registerSchema.safeParse(await request.json())
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? 'Invalid input'
+      return NextResponse.json({ error: message }, { status: 400 })
     }
 
-    if (!name || !email || !password || !confirmPassword) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
-    }
-
-    if (password !== confirmPassword) {
-      return NextResponse.json({ error: 'Passwords do not match' }, { status: 400 })
-    }
+    const { name, email, password } = parsed.data
 
     const existingUser = await prisma.user.findUnique({ where: { email } })
 
@@ -34,7 +40,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await hashPassword(password)
 
     await prisma.user.create({
       data: { name, email, password: hashedPassword },

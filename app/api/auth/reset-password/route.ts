@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
 import { prisma } from '@/src/lib/prisma'
 import { resetPasswordLimiter, getIP, rateLimit } from '@/src/lib/rate-limit'
+import { hashPassword } from '@/src/lib/password'
 
 export async function POST(req: NextRequest) {
   const { limited, response } = await rateLimit(resetPasswordLimiter, getIP(req))
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   }
 
   const email = record.identifier.replace('password-reset:', '')
-  const hashedPassword = await bcrypt.hash(password, 12)
+  const hashedPassword = await hashPassword(password)
 
   await prisma.user.update({
     where: { email },

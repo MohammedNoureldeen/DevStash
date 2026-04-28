@@ -80,6 +80,12 @@ export default function NewItemDialog({
     setUploadResult(null)
   }
 
+  function normalizeUrl(url: string): string {
+    const trimmed = url.trim()
+    if (!trimmed) return trimmed
+    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+  }
+
   function handleSubmit() {
     const tags = form.tags
       .split(',')
@@ -93,7 +99,7 @@ export default function NewItemDialog({
         description: form.description.trim() || undefined,
         content: form.content.trim() || undefined,
         language: form.language.trim() || undefined,
-        url: form.url.trim() || undefined,
+        url: type === 'link' ? normalizeUrl(form.url) || undefined : undefined,
         fileKey: uploadResult?.key,
         fileName: uploadResult?.fileName,
         fileSize: uploadResult?.fileSize,

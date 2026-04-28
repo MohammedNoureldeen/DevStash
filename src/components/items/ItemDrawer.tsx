@@ -23,6 +23,7 @@ import {
   Code, Sparkles, StickyNote, Terminal,
   Link as LinkIcon, File, Image,
 } from 'lucide-react'
+import NextImage from 'next/image'
 import type { ItemWithType } from '@/src/lib/db/items'
 import { updateItem } from '@/src/actions/items'
 import CodeEditor from '@/src/components/ui/CodeEditor'
@@ -127,13 +128,19 @@ export default function ItemDrawer({
     setLoading(true)
     setIsEditing(false)
     setItem(null)
-    fetch(`/api/items/${itemId}`)
-      .then(res => res.json())
-      .then((data: ItemWithType) => {
-        setItem(data)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    const timer = setTimeout(() => {
+      fetch(`/api/items/${itemId}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to load item')
+          return res.json()
+        })
+        .then((data: ItemWithType) => {
+          setItem(data)
+          setLoading(false)
+        })
+        .catch(() => setLoading(false))
+    }, 150)
+    return () => clearTimeout(timer)
   }, [itemId])
 
   function handleCopy() {
@@ -163,11 +170,14 @@ export default function ItemDrawer({
       .map(t => t.trim())
       .filter(Boolean)
 
+    const rawUrl = form.url.trim()
+    const normalizedUrl = rawUrl && !/^https?:\/\//i.test(rawUrl) ? `https://${rawUrl}` : rawUrl
+
     const result = await updateItem(item.id, {
       title: form.title.trim(),
       description: form.description.trim() || null,
       content: form.content.trim() || null,
-      url: form.url.trim() || null,
+      url: normalizedUrl || null,
       language: form.language.trim() || null,
       tags,
     })
@@ -534,11 +544,14 @@ export default function ItemDrawer({
                     </p>
                     {typeName === 'image' ? (
                       <div className="flex flex-col gap-2">
-                        <img
-                          src={fileProxyUrl}
-                          alt={item.fileName ?? 'Image'}
-                          className="w-full rounded-lg border border-border object-contain max-h-64"
-                        />
+                        <div className="relative w-full max-h-64 aspect-video">
+                          <NextImage
+                            src={fileProxyUrl}
+                            alt={item.fileName ?? 'Image'}
+                            fill
+                            className="rounded-lg border border-border object-contain"
+                          />
+                        </div>
                         <div className="flex items-center justify-between">
                           <div className="flex flex-col">
                             <span className="text-sm text-foreground truncate">{item.fileName}</span>
