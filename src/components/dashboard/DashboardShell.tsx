@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import TopBar from './TopBar'
 import Sidebar, { type SidebarData } from './Sidebar'
+import NewItemDialog from '@/src/components/items/NewItemDialog'
 import type { Session } from 'next-auth'
 
 type SidebarUser = Session['user'] | null
@@ -18,10 +19,12 @@ export default function DashboardShell({
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [newItemOpen, setNewItemOpen] = useState(false)
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <TopBar onMobileMenuClick={() => setMobileOpen(true)} />
+      <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} />
+      <TopBar onMobileMenuClick={() => setMobileOpen(true)} onNewItem={() => setNewItemOpen(true)} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           collapsed={collapsed}

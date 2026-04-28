@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
 interface TopBarProps {
-  onMobileMenuClick: () => void;
+  onMobileMenuClick: () => void
+  onNewItem: () => void
 }
 
-export default function TopBar({ onMobileMenuClick }: TopBarProps) {
+export default function TopBar({ onMobileMenuClick, onNewItem }: TopBarProps) {
   return (
     <header className="flex items-center gap-4 border-b border-border bg-background/95 backdrop-blur-sm px-4 h-16 shrink-0">
       {/* Mobile menu button */}
@@ -53,8 +54,9 @@ export default function TopBar({ onMobileMenuClick }: TopBarProps) {
           <Bell className="h-4 w-4" />
           <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
         </Button>
-        <Button 
+        <Button
           className="h-9 gap-2 btn-professional bg-gradient-to-r from-primary to-indigo-600 border-0"
+          onClick={onNewItem}
         >
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">New</span>

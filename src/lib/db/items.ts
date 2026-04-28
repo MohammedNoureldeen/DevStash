@@ -1,4 +1,5 @@
 import { prisma } from '@/src/lib/prisma'
+import type { ContentType } from '@/generated/prisma/client'
 
 export type ItemWithType = {
   id: string
@@ -18,6 +19,17 @@ export type ItemWithType = {
     icon: string
     color: string
   }
+  tags: string[]
+}
+
+export type CreateItemData = {
+  title: string
+  description: string | null
+  contentType: ContentType
+  content: string | null
+  url: string | null
+  language: string | null
+  itemTypeId: string
   tags: string[]
 }
 
@@ -165,6 +177,40 @@ export async function updateItem(
 
 export async function deleteItem(id: string, userId: string): Promise<void> {
   await prisma.item.delete({ where: { id, userId } })
+}
+
+export async function getItemTypeByName(name: string): Promise<{ id: string } | null> {
+  return prisma.itemType.findFirst({
+    where: { name, isSystem: true },
+    select: { id: true },
+  })
+}
+
+export async function createItem(userId: string, data: CreateItemData): Promise<ItemWithType> {
+  const item = await prisma.item.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      contentType: data.contentType,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      userId,
+      itemTypeId: data.itemTypeId,
+      tags: {
+        create: data.tags.map((tagName) => ({
+          tag: {
+            connectOrCreate: {
+              where: { name: tagName },
+              create: { name: tagName },
+            },
+          },
+        })),
+      },
+    },
+    include: itemWithTypeInclude,
+  })
+  return mapItem(item)
 }
 
 export async function getItemTypesWithCounts(): Promise<ItemTypeWithCount[]> {
