@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import type { ItemWithType } from '@/src/lib/db/items'
 import { updateItem } from '@/src/actions/items'
+import CodeEditor from '@/src/components/ui/CodeEditor'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Code,
@@ -38,6 +39,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 const CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note'])
 const LANGUAGE_TYPES = new Set(['snippet', 'command'])
+const CODE_TYPES = new Set(['snippet', 'command'])
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`rounded-md bg-muted animate-pulse ${className ?? ''}`} />
@@ -195,6 +197,7 @@ export default function ItemDrawer({
   const typeName = item?.itemType.name ?? ''
   const showContent = CONTENT_TYPES.has(typeName)
   const showLanguage = LANGUAGE_TYPES.has(typeName)
+  const showCode = CODE_TYPES.has(typeName)
   const showUrl = typeName === 'link'
 
   return (
@@ -367,13 +370,21 @@ export default function ItemDrawer({
                     <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                       Content
                     </label>
-                    <textarea
-                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
-                      rows={8}
-                      value={form.content}
-                      onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-                      placeholder="Content…"
-                    />
+                    {showCode ? (
+                      <CodeEditor
+                        value={form.content}
+                        onChange={(val) => setForm(f => ({ ...f, content: val }))}
+                        language={form.language}
+                      />
+                    ) : (
+                      <textarea
+                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                        rows={8}
+                        value={form.content}
+                        onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+                        placeholder="Content…"
+                      />
+                    )}
                   </div>
                 )}
 
@@ -488,11 +499,19 @@ export default function ItemDrawer({
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
                       Content
                     </p>
-                    <div className="rounded-lg bg-muted/50 border border-border p-3 overflow-x-auto">
-                      <pre className="text-sm text-foreground whitespace-pre-wrap break-words font-mono">
-                        {item.content}
-                      </pre>
-                    </div>
+                    {showCode ? (
+                      <CodeEditor
+                        value={item.content}
+                        language={item.language ?? ''}
+                        readOnly
+                      />
+                    ) : (
+                      <div className="rounded-lg bg-muted/50 border border-border p-3 overflow-x-auto">
+                        <pre className="text-sm text-foreground whitespace-pre-wrap break-words font-mono">
+                          {item.content}
+                        </pre>
+                      </div>
+                    )}
                   </div>
                 )}
 
