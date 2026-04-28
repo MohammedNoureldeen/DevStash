@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Code, Sparkles, StickyNote, Terminal, Link as LinkIcon } from 'lucide-react'
 import { createItem } from '@/src/actions/items'
+import CodeEditor from '@/src/components/ui/CodeEditor'
 
 const ITEM_TYPES = [
   { name: 'snippet', label: 'Snippet', icon: Code },
@@ -171,13 +172,21 @@ export default function NewItemDialog({
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 Content
               </label>
-              <textarea
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
-                rows={5}
-                value={form.content}
-                onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-                placeholder="Content…"
-              />
+              {showLanguage ? (
+                <CodeEditor
+                  value={form.content}
+                  onChange={(val) => setForm(f => ({ ...f, content: val }))}
+                  language={form.language}
+                />
+              ) : (
+                <textarea
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                  rows={5}
+                  value={form.content}
+                  onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+                  placeholder="Content…"
+                />
+              )}
             </div>
           )}
 
