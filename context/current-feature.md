@@ -1,48 +1,16 @@
-# Current Feature: Add Item to Collections
+# Current Feature
 
 ## Status
 
-Complete
+Not Started
 
 ## Goals
 
-### DB Layer
-- Add `getCollectionsForSelect(userId): Promise<{ id: string; name: string }[]>` to `src/lib/db/collections.ts` — lightweight list for dropdowns
-- Add `collections: { id: string; name: string }[]` to `ItemWithType` in `src/lib/db/items.ts` (default `[]` when not queried)
-- Add `collectionIds: string[]` to `CreateItemData`; update `createItem(userId, data)` to create `ItemCollection` records for each id after inserting the item
-- Add `collectionIds: string[]` to `UpdateItemData`; update `updateItem(id, userId, data)` to sync collections via `deleteMany` + `createMany`
-- Update `getItemById` query to include `collections` relation (`select: { collectionId: true, collection: { select: { id, name } } }`) so the edit form pre-populates correctly
-
-### Actions Layer
-- Add optional `collectionIds?: string[]` (default `[]`) to the Zod schema in `createItem` server action (`src/actions/items.ts`); pass through to DB function
-- Add optional `collectionIds?: string[]` (default `[]`) to the Zod schema in `updateItem` server action; pass through to DB function
-
-### UI — CollectionSelector Component
-- Create `src/components/collections/CollectionSelector.tsx` — accepts `collections: { id: string; name: string }[]` and `value: string[]` / `onChange: (ids: string[]) => void`; renders a labeled multi-select using shadcn Popover + Command (checkbox list); shows a summary badge ("2 collections") when closed
-
-### UI — NewItemDialog
-- Add `collections: { id: string; name: string }[]` prop to `NewItemDialog`
-- Add `collectionIds: string[]` to form state (default `[]`)
-- Render `<CollectionSelector>` below the tags field (always visible regardless of item type)
-- Include `collectionIds` in the `createItem` server action call
-
-### UI — ItemDrawer
-- Add `collections: { id: string; name: string }[]` prop to `ItemDrawer`
-- Add `collectionIds: string[]` to `EditForm` state, initialised from `item.collections.map(c => c.id)` in `formFromItem`
-- Render `<CollectionSelector>` in edit mode below the tags field
-- Include `collectionIds` in the `updateItem` server action call
-
-### Prop Drilling — Pass Collections Down
-- Add `collections` prop to `DashboardShell`, `ItemsListContent`, and `MainContent`; thread it through to `NewItemDialog` and `ItemDrawer`
-- Fetch `getCollectionsForSelect(session.user.id)` in `app/dashboard/page.tsx` (parallel with existing queries) and pass to `DashboardShell`
-- Fetch `getCollectionsForSelect(session.user.id)` in `app/items/[type]/page.tsx` and pass to `DashboardShell`
+<!-- Goals go here -->
 
 ## Notes
 
-- The junction table is `ItemCollection` with composite PK `[itemId, collectionId]` and `addedAt DateTime @default(now())`
-- No schema migration needed — `ItemCollection` table already exists
-- `ItemWithType` is used across all item queries; extend it with `collections: { id: string; name: string }[]` defaulting to `[]` via `mapItem`'s optional parameter so non-drawer queries remain unaffected
-- Do not display or link to collection pages — only the ability to associate items with collections is in scope
+<!-- Notes go here -->
 
 ## History
 
@@ -526,3 +494,24 @@ Key constraints:
 - **2026-04-12** — Set current feature to Neon PostgreSQL + Prisma Setup.
 - **2026-04-13** — Created branch `feature/neon-prisma-setup`. Installed Prisma 7 + `@prisma/adapter-pg` + `pg`. Created `prisma/schema.prisma` (Prisma 7 format: provider `prisma-client`, output `../generated/prisma`, no URL in datasource). Created `prisma.config.ts` at root (datasource URL via `dotenv` + `process.env`). Created `src/lib/prisma.ts` singleton using `PrismaPg` driver adapter. Created `.env.example`. `prisma generate` and `tsc --noEmit` both pass.
 - **2026-04-13** — Added Neon dev + production connection strings to `.env`. Ran `prisma migrate dev --name init` — migration `20260412222311_init` created and applied to dev branch. All 10 tables live in Neon.
+
+## Add Item to Collections
+
+### Status
+
+Completed
+
+### Goals
+
+- Add `getCollectionsForSelect(userId)` DB helper for dropdowns
+- Extend `ItemWithType` with `collections` array
+- Update `createItem` and `updateItem` to sync `ItemCollection` junction records
+- Create `CollectionSelector` multi-select component (Popover + Command)
+- Integrate collection selection into `NewItemDialog` and `ItemDrawer`
+- Thread collections prop through `DashboardShell`, `ItemsListContent`, `MainContent`
+- Fetch collections in parallel on dashboard and items list pages
+
+### History
+
+- **2026-04-29** — Created branch `feature/add-item-to-collections`. Added `getCollectionsForSelect` to `src/lib/db/collections.ts`. Extended `ItemWithType` in `src/lib/db/items.ts` with `collections` array and updated `createItem`/`updateItem` to sync `ItemCollection` records via `deleteMany` + `createMany`. Updated `getItemById` to include collections relation. Added `collectionIds` to Zod schemas in `src/actions/items.ts`. Created `src/components/collections/CollectionSelector.tsx` (shadcn Popover + Command checkbox multi-select with summary badge). Integrated `CollectionSelector` into `NewItemDialog` and `ItemDrawer`. Threaded `collections` prop through `DashboardShell`, `ItemsListContent`, and `MainContent`. Fetched `getCollectionsForSelect` in parallel on `app/dashboard/page.tsx` and `app/items/[type]/page.tsx`. Installed shadcn `command`, `popover`, and `input-group` components. `tsc --noEmit` passes clean.
+- **2026-04-29** — Merged into main. Feature complete.
