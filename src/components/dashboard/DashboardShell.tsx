@@ -13,10 +13,12 @@ export default function DashboardShell({
   children,
   sidebarData,
   user,
+  collections = [],
 }: {
   children: React.ReactNode
   sidebarData: SidebarData
   user: SidebarUser
+  collections?: { id: string; name: string }[]
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -25,7 +27,7 @@ export default function DashboardShell({
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} />
+      <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} collections={collections} />
       <NewCollectionDialog open={newCollectionOpen} onOpenChange={setNewCollectionOpen} />
       <TopBar
         onMobileMenuClick={() => setMobileOpen(true)}

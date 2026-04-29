@@ -145,11 +145,13 @@ export default function MainContent({
   pinnedItems,
   recentItems,
   stats,
+  availableCollections = [],
 }: {
   collections: CollectionWithDetails[]
   pinnedItems: ItemWithType[]
   recentItems: ItemWithType[]
   stats: DashboardStats
+  availableCollections?: { id: string; name: string }[]
 }) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
@@ -220,6 +222,7 @@ export default function MainContent({
         open={!!selectedItemId}
         itemId={selectedItemId}
         onClose={() => setSelectedItemId(null)}
+        collections={availableCollections}
       />
     </>
   )

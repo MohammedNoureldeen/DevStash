@@ -23,6 +23,7 @@ export type ItemWithType = {
     color: string
   }
   tags: string[]
+  collections: { id: string; name: string }[]
 }
 
 export type CreateItemData = {
@@ -37,6 +38,7 @@ export type CreateItemData = {
   language: string | null
   itemTypeId: string
   tags: string[]
+  collectionIds: string[]
 }
 
 export type UpdateItemData = {
@@ -46,6 +48,7 @@ export type UpdateItemData = {
   url: string | null
   language: string | null
   tags: string[]
+  collectionIds: string[]
 }
 
 export type DashboardStats = {
@@ -60,24 +63,27 @@ const itemWithTypeInclude = {
   tags: { include: { tag: true } },
 } as const
 
-function mapItem(item: {
-  id: string
-  title: string
-  description: string | null
-  contentType: string
-  content: string | null
-  url: string | null
-  fileUrl: string | null
-  fileName: string | null
-  fileSize: number | null
-  language: string | null
-  isFavorite: boolean
-  isPinned: boolean
-  createdAt: Date
-  lastUsedAt: Date | null
-  itemType: { id: string; name: string; icon: string; color: string }
-  tags: { tag: { name: string } }[]
-}): ItemWithType {
+function mapItem(
+  item: {
+    id: string
+    title: string
+    description: string | null
+    contentType: string
+    content: string | null
+    url: string | null
+    fileUrl: string | null
+    fileName: string | null
+    fileSize: number | null
+    language: string | null
+    isFavorite: boolean
+    isPinned: boolean
+    createdAt: Date
+    lastUsedAt: Date | null
+    itemType: { id: string; name: string; icon: string; color: string }
+    tags: { tag: { name: string } }[]
+  },
+  collections: { id: string; name: string }[] = [],
+): ItemWithType {
   return {
     id: item.id,
     title: item.title,
@@ -95,6 +101,7 @@ function mapItem(item: {
     lastUsedAt: item.lastUsedAt,
     itemType: item.itemType,
     tags: item.tags.map((t) => t.tag.name),
+    collections,
   }
 }
 
@@ -104,7 +111,7 @@ export async function getPinnedItems(): Promise<ItemWithType[]> {
     orderBy: { updatedAt: 'desc' },
     include: itemWithTypeInclude,
   })
-  return items.map(mapItem)
+  return items.map((item) => mapItem(item))
 }
 
 export async function getRecentItems(limit = 10): Promise<ItemWithType[]> {
@@ -113,7 +120,7 @@ export async function getRecentItems(limit = 10): Promise<ItemWithType[]> {
     take: limit,
     include: itemWithTypeInclude,
   })
-  return items.map(mapItem)
+  return items.map((item) => mapItem(item))
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
@@ -145,16 +152,21 @@ export async function getItemsByTypeName(typeName: string): Promise<ItemWithType
     orderBy: { updatedAt: 'desc' },
     include: itemWithTypeInclude,
   })
-  return items.map(mapItem)
+  return items.map((item) => mapItem(item))
 }
 
 export async function getItemById(id: string, userId: string): Promise<ItemWithType | null> {
   const item = await prisma.item.findFirst({
     where: { id, userId },
-    include: itemWithTypeInclude,
+    include: {
+      ...itemWithTypeInclude,
+      collections: {
+        include: { collection: { select: { id: true, name: true } } },
+      },
+    },
   })
   if (!item) return null
-  return mapItem(item)
+  return mapItem(item, item.collections.map((c) => c.collection))
 }
 
 export async function updateItem(
@@ -180,6 +192,10 @@ export async function updateItem(
             },
           },
         })),
+      },
+      collections: {
+        deleteMany: {},
+        create: data.collectionIds.map((collectionId) => ({ collectionId })),
       },
     },
     include: itemWithTypeInclude,
@@ -221,6 +237,9 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
             },
           },
         })),
+      },
+      collections: {
+        create: data.collectionIds.map((collectionId) => ({ collectionId })),
       },
     },
     include: itemWithTypeInclude,

@@ -28,6 +28,7 @@ import type { ItemWithType } from '@/src/lib/db/items'
 import { updateItem } from '@/src/actions/items'
 import CodeEditor from '@/src/components/ui/CodeEditor'
 import MarkdownEditor from '@/src/components/ui/MarkdownEditor'
+import CollectionSelector from '@/src/components/collections/CollectionSelector'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Code,
@@ -84,6 +85,7 @@ type EditForm = {
   content: string
   language: string
   url: string
+  collectionIds: string[]
 }
 
 function formFromItem(item: ItemWithType): EditForm {
@@ -94,6 +96,7 @@ function formFromItem(item: ItemWithType): EditForm {
     content: item.content ?? '',
     language: item.language ?? '',
     url: item.url ?? '',
+    collectionIds: item.collections.map((c) => c.id),
   }
 }
 
@@ -101,10 +104,12 @@ export default function ItemDrawer({
   open,
   itemId,
   onClose,
+  collections = [],
 }: {
   open: boolean
   itemId: string | null
   onClose: () => void
+  collections?: { id: string; name: string }[]
 }) {
   const router = useRouter()
   const [item, setItem] = useState<ItemWithType | null>(null)
@@ -121,6 +126,7 @@ export default function ItemDrawer({
     content: '',
     language: '',
     url: '',
+    collectionIds: [],
   })
 
   useEffect(() => {
@@ -180,6 +186,7 @@ export default function ItemDrawer({
       url: normalizedUrl || null,
       language: form.language.trim() || null,
       tags,
+      collectionIds: form.collectionIds,
     })
 
     setIsSaving(false)
@@ -384,6 +391,18 @@ export default function ItemDrawer({
                     placeholder="react, typescript, utils"
                   />
                   <p className="text-xs text-muted-foreground">Comma-separated</p>
+                </div>
+
+                {/* Collections */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Collections
+                  </label>
+                  <CollectionSelector
+                    collections={collections}
+                    value={form.collectionIds}
+                    onChange={(ids) => setForm((f) => ({ ...f, collectionIds: ids }))}
+                  />
                 </div>
 
                 {/* Content (type-specific) */}

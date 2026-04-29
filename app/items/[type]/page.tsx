@@ -3,7 +3,7 @@ import { auth } from '@/src/auth'
 import DashboardShell from '@/src/components/dashboard/DashboardShell'
 import ItemsListContent from '@/src/components/items/ItemsListContent'
 import { getItemsByTypeName, getItemTypesWithCounts } from '@/src/lib/db/items'
-import { getFavoriteCollections, getRecentCollections } from '@/src/lib/db/collections'
+import { getFavoriteCollections, getRecentCollections, getCollectionsForSelect } from '@/src/lib/db/collections'
 
 const PLURAL_TO_SINGULAR: Record<string, string> = {
   snippets: 'snippet',
@@ -24,15 +24,17 @@ export default async function ItemsTypePage({
   const typeName = PLURAL_TO_SINGULAR[type]
   if (!typeName) notFound()
 
-  const [session, items, itemTypes, favoriteCollections, recentCollections] = await Promise.all([
-    auth(),
-    getItemsByTypeName(typeName),
-    getItemTypesWithCounts(),
-    getFavoriteCollections(),
-    getRecentCollections(3),
-  ])
-
+  const session = await auth()
   if (!session) redirect('/sign-in')
+
+  const [items, itemTypes, favoriteCollections, recentCollections, selectCollections] =
+    await Promise.all([
+      getItemsByTypeName(typeName),
+      getItemTypesWithCounts(),
+      getFavoriteCollections(),
+      getRecentCollections(3),
+      getCollectionsForSelect(session.user.id),
+    ])
 
   const typeMetadata = itemTypes.find(t => t.name === typeName)
   if (!typeMetadata) notFound()
@@ -41,11 +43,13 @@ export default async function ItemsTypePage({
     <DashboardShell
       sidebarData={{ itemTypes, favoriteCollections, recentCollections }}
       user={session.user ?? null}
+      collections={selectCollections}
     >
       <ItemsListContent
         items={items}
         typeLabel={type}
         typeColor={typeMetadata.color}
+        collections={selectCollections}
       />
     </DashboardShell>
   )

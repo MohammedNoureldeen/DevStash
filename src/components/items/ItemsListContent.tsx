@@ -181,10 +181,12 @@ export default function ItemsListContent({
   items,
   typeLabel,
   typeColor,
+  collections = [],
 }: {
   items: ItemWithType[]
   typeLabel: string
   typeColor: string
+  collections?: { id: string; name: string }[]
 }) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const isImageGallery = typeLabel === 'images'
@@ -241,6 +243,7 @@ export default function ItemsListContent({
         open={!!selectedItemId}
         itemId={selectedItemId}
         onClose={() => setSelectedItemId(null)}
+        collections={collections}
       />
     </>
   )

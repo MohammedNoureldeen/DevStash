@@ -122,6 +122,16 @@ export async function getFavoriteCollections(): Promise<FavoriteCollection[]> {
   })
 }
 
+export async function getCollectionsForSelect(
+  userId: string,
+): Promise<{ id: string; name: string }[]> {
+  return prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true },
+  })
+}
+
 const collectionItemsInclude = {
   items: {
     include: {
@@ -168,6 +178,7 @@ export async function getCollectionById(id: string): Promise<CollectionDetail | 
     lastUsedAt: item.lastUsedAt,
     itemType: item.itemType,
     tags: item.tags.map((t) => t.tag.name),
+    collections: [],
   }))
 
   return { ...base, items }

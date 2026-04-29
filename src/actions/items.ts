@@ -35,6 +35,7 @@ const createItemSchema = z
     fileName: z.string().optional(),
     fileSize: z.number().optional(),
     tags: z.array(z.string().trim().min(1)).optional().default([]),
+    collectionIds: z.array(z.string()).optional().default([]),
   })
   .superRefine((data, ctx) => {
     if (data.type === 'link') {
@@ -73,7 +74,7 @@ export async function createItem(payload: unknown): Promise<CreateItemResult> {
   const parsed = createItemSchema.safeParse(payload)
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
 
-  const { type, title, description, content, language, url, fileKey, fileName, fileSize, tags } =
+  const { type, title, description, content, language, url, fileKey, fileName, fileSize, tags, collectionIds } =
     parsed.data
 
   const itemType = await getItemTypeByName(type)
@@ -92,6 +93,7 @@ export async function createItem(payload: unknown): Promise<CreateItemResult> {
       language: language?.trim() || null,
       itemTypeId: itemType.id,
       tags: tags ?? [],
+      collectionIds: collectionIds ?? [],
     })
     return { success: true, data: item }
   } catch {
@@ -111,6 +113,7 @@ const updateItemSchema = z.object({
     .or(z.literal('').transform(() => null)),
   language: z.string().nullable().optional(),
   tags: z.array(z.string().trim().min(1)),
+  collectionIds: z.array(z.string()).optional().default([]),
 })
 
 type UpdateItemResult =
@@ -131,7 +134,7 @@ export async function updateItem(
     return { success: false, error: parsed.error.issues[0].message }
   }
 
-  const { title, description, content, url, language, tags } = parsed.data
+  const { title, description, content, url, language, tags, collectionIds } = parsed.data
 
   try {
     const item = await dbUpdateItem(itemId, session.user.id, {
@@ -141,6 +144,7 @@ export async function updateItem(
       url: url ?? null,
       language: language ?? null,
       tags,
+      collectionIds: collectionIds ?? [],
     })
     return { success: true, data: item }
   } catch {

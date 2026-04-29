@@ -1,12 +1,48 @@
-# Current Feature
+# Current Feature: Add Item to Collections
 
 ## Status
 
-Not Started
+Complete
 
 ## Goals
 
+### DB Layer
+- Add `getCollectionsForSelect(userId): Promise<{ id: string; name: string }[]>` to `src/lib/db/collections.ts` — lightweight list for dropdowns
+- Add `collections: { id: string; name: string }[]` to `ItemWithType` in `src/lib/db/items.ts` (default `[]` when not queried)
+- Add `collectionIds: string[]` to `CreateItemData`; update `createItem(userId, data)` to create `ItemCollection` records for each id after inserting the item
+- Add `collectionIds: string[]` to `UpdateItemData`; update `updateItem(id, userId, data)` to sync collections via `deleteMany` + `createMany`
+- Update `getItemById` query to include `collections` relation (`select: { collectionId: true, collection: { select: { id, name } } }`) so the edit form pre-populates correctly
+
+### Actions Layer
+- Add optional `collectionIds?: string[]` (default `[]`) to the Zod schema in `createItem` server action (`src/actions/items.ts`); pass through to DB function
+- Add optional `collectionIds?: string[]` (default `[]`) to the Zod schema in `updateItem` server action; pass through to DB function
+
+### UI — CollectionSelector Component
+- Create `src/components/collections/CollectionSelector.tsx` — accepts `collections: { id: string; name: string }[]` and `value: string[]` / `onChange: (ids: string[]) => void`; renders a labeled multi-select using shadcn Popover + Command (checkbox list); shows a summary badge ("2 collections") when closed
+
+### UI — NewItemDialog
+- Add `collections: { id: string; name: string }[]` prop to `NewItemDialog`
+- Add `collectionIds: string[]` to form state (default `[]`)
+- Render `<CollectionSelector>` below the tags field (always visible regardless of item type)
+- Include `collectionIds` in the `createItem` server action call
+
+### UI — ItemDrawer
+- Add `collections: { id: string; name: string }[]` prop to `ItemDrawer`
+- Add `collectionIds: string[]` to `EditForm` state, initialised from `item.collections.map(c => c.id)` in `formFromItem`
+- Render `<CollectionSelector>` in edit mode below the tags field
+- Include `collectionIds` in the `updateItem` server action call
+
+### Prop Drilling — Pass Collections Down
+- Add `collections` prop to `DashboardShell`, `ItemsListContent`, and `MainContent`; thread it through to `NewItemDialog` and `ItemDrawer`
+- Fetch `getCollectionsForSelect(session.user.id)` in `app/dashboard/page.tsx` (parallel with existing queries) and pass to `DashboardShell`
+- Fetch `getCollectionsForSelect(session.user.id)` in `app/items/[type]/page.tsx` and pass to `DashboardShell`
+
 ## Notes
+
+- The junction table is `ItemCollection` with composite PK `[itemId, collectionId]` and `addedAt DateTime @default(now())`
+- No schema migration needed — `ItemCollection` table already exists
+- `ItemWithType` is used across all item queries; extend it with `collections: { id: string; name: string }[]` defaulting to `[]` via `mapItem`'s optional parameter so non-drawer queries remain unaffected
+- Do not display or link to collection pages — only the ability to associate items with collections is in scope
 
 ## History
 

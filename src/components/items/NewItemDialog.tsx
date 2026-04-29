@@ -25,6 +25,7 @@ import { createItem } from '@/src/actions/items'
 import CodeEditor from '@/src/components/ui/CodeEditor'
 import MarkdownEditor from '@/src/components/ui/MarkdownEditor'
 import FileUpload, { type UploadResult } from '@/src/components/ui/FileUpload'
+import CollectionSelector from '@/src/components/collections/CollectionSelector'
 
 const ITEM_TYPES = [
   { name: 'snippet', label: 'Snippet', icon: Code },
@@ -55,21 +56,25 @@ const DEFAULT_FORM = {
 export default function NewItemDialog({
   open,
   onOpenChange,
+  collections = [],
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
+  collections?: { id: string; name: string }[]
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [type, setType] = useState<ItemTypeName>('snippet')
   const [form, setForm] = useState(DEFAULT_FORM)
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
+  const [collectionIds, setCollectionIds] = useState<string[]>([])
 
   function handleOpenChange(isOpen: boolean) {
     if (!isOpen) {
       setForm(DEFAULT_FORM)
       setType('snippet')
       setUploadResult(null)
+      setCollectionIds([])
     }
     onOpenChange(isOpen)
   }
@@ -104,6 +109,7 @@ export default function NewItemDialog({
         fileName: uploadResult?.fileName,
         fileSize: uploadResult?.fileSize,
         tags,
+        collectionIds,
       })
 
       if (!result.success) {
@@ -194,6 +200,18 @@ export default function NewItemDialog({
               value={form.tags}
               onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
               placeholder="react, typescript (comma-separated)"
+            />
+          </div>
+
+          {/* Collections */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Collections
+            </label>
+            <CollectionSelector
+              collections={collections}
+              value={collectionIds}
+              onChange={setCollectionIds}
             />
           </div>
 
