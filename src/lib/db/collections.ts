@@ -95,8 +95,9 @@ export async function createCollection(
   return mapCollection(col)
 }
 
-export async function getRecentCollections(limit = 6): Promise<CollectionWithDetails[]> {
+export async function getRecentCollections(userId: string, limit = 6): Promise<CollectionWithDetails[]> {
   const collections = await prisma.collection.findMany({
+    where: { userId },
     orderBy: { createdAt: 'desc' },
     take: limit,
     include: {
@@ -114,9 +115,9 @@ export async function getRecentCollections(limit = 6): Promise<CollectionWithDet
   return collections.map(mapCollection)
 }
 
-export async function getFavoriteCollections(): Promise<FavoriteCollection[]> {
+export async function getFavoriteCollections(userId: string): Promise<FavoriteCollection[]> {
   return prisma.collection.findMany({
-    where: { isFavorite: true },
+    where: { isFavorite: true, userId },
     orderBy: { updatedAt: 'desc' },
     select: { id: true, name: true },
   })
@@ -145,17 +146,18 @@ const collectionItemsInclude = {
   },
 } as const
 
-export async function getAllCollections(): Promise<CollectionWithDetails[]> {
+export async function getAllCollections(userId: string): Promise<CollectionWithDetails[]> {
   const collections = await prisma.collection.findMany({
+    where: { userId },
     orderBy: { updatedAt: 'desc' },
     include: collectionItemsInclude,
   })
   return collections.map(mapCollection)
 }
 
-export async function getCollectionById(id: string): Promise<CollectionDetail | null> {
-  const col = await prisma.collection.findUnique({
-    where: { id },
+export async function getCollectionById(id: string, userId: string): Promise<CollectionDetail | null> {
+  const col = await prisma.collection.findFirst({
+    where: { id, userId },
     include: collectionItemsInclude,
   })
   if (!col) return null

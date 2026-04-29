@@ -25,15 +25,16 @@ export default async function ItemsTypePage({
   if (!typeName) notFound()
 
   const session = await auth()
-  if (!session) redirect('/sign-in')
+  if (!session?.user?.id) redirect('/sign-in')
+  const userId = session.user.id
 
   const [items, itemTypes, favoriteCollections, recentCollections, selectCollections] =
     await Promise.all([
       getItemsByTypeName(typeName),
       getItemTypesWithCounts(),
-      getFavoriteCollections(),
-      getRecentCollections(3),
-      getCollectionsForSelect(session.user.id),
+      getFavoriteCollections(userId),
+      getRecentCollections(userId, 3),
+      getCollectionsForSelect(userId),
     ])
 
   const typeMetadata = itemTypes.find(t => t.name === typeName)
@@ -42,7 +43,7 @@ export default async function ItemsTypePage({
   return (
     <DashboardShell
       sidebarData={{ itemTypes, favoriteCollections, recentCollections }}
-      user={session.user ?? null}
+      user={session.user}
       collections={selectCollections}
     >
       <ItemsListContent

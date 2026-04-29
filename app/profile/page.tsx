@@ -16,8 +16,8 @@ export default async function ProfilePage() {
     getProfileData(userId),
     getProfileStats(userId),
     getItemTypesWithCounts(),
-    getFavoriteCollections(),
-    getRecentCollections(3),
+    getFavoriteCollections(userId),
+    getRecentCollections(userId, 3),
   ])
 
   if (!profile) redirect('/sign-in')

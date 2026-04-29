@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/src/auth'
 import DashboardShell from '@/src/components/dashboard/DashboardShell'
@@ -7,20 +6,21 @@ import { getAllCollections, getFavoriteCollections, getRecentCollections } from 
 import { getItemTypesWithCounts } from '@/src/lib/db/items'
 
 export default async function CollectionsPage() {
-  const [session, collections, itemTypes, favoriteCollections, recentCollections] = await Promise.all([
-    auth(),
-    getAllCollections(),
-    getItemTypesWithCounts(),
-    getFavoriteCollections(),
-    getRecentCollections(3),
-  ])
+  const session = await auth()
+  if (!session?.user?.id) redirect('/sign-in')
+  const userId = session.user.id
 
-  if (!session) redirect('/sign-in')
+  const [collections, itemTypes, favoriteCollections, recentCollections] = await Promise.all([
+    getAllCollections(userId),
+    getItemTypesWithCounts(),
+    getFavoriteCollections(userId),
+    getRecentCollections(userId, 3),
+  ])
 
   return (
     <DashboardShell
       sidebarData={{ itemTypes, favoriteCollections, recentCollections }}
-      user={session.user ?? null}
+      user={session.user}
     >
       <div className="flex flex-col gap-6">
         <div>
@@ -37,14 +37,7 @@ export default async function CollectionsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {collections.map(col => (
-              <div key={col.id} className="relative">
-                <CollectionCard collection={col} />
-                <Link
-                  href={`/collections/${col.id}`}
-                  className="absolute inset-0 rounded-xl"
-                  aria-label={col.name}
-                />
-              </div>
+              <CollectionCard key={col.id} collection={col} />
             ))}
           </div>
         )}
