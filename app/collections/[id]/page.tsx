@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { auth } from '@/src/auth'
 import DashboardShell from '@/src/components/dashboard/DashboardShell'
 import ItemsListContent from '@/src/components/items/ItemsListContent'
+import CollectionDetailActions from '@/src/components/collections/CollectionDetailActions'
 import { getCollectionById, getFavoriteCollections, getRecentCollections, getCollectionsForSelect } from '@/src/lib/db/collections'
 import { getItemTypesWithCounts } from '@/src/lib/db/items'
 
@@ -49,12 +50,24 @@ export default async function CollectionDetailPage({
                 <p className="text-muted-foreground mt-1">{collection.description}</p>
               )}
             </div>
-            <span
-              className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full"
-              style={{ backgroundColor: `${collection.borderColor}18`, color: collection.borderColor }}
-            >
-              {collection.itemCount} {collection.itemCount === 1 ? 'item' : 'items'}
-            </span>
+            <div className="flex items-center gap-3 shrink-0">
+              <span
+                className="text-xs font-medium px-2.5 py-1 rounded-full"
+                style={{ backgroundColor: `${collection.borderColor}18`, color: collection.borderColor }}
+              >
+                {collection.itemCount} {collection.itemCount === 1 ? 'item' : 'items'}
+              </span>
+              <CollectionDetailActions
+                collection={{
+                  id: collection.id,
+                  name: collection.name,
+                  description: collection.description,
+                  isFavorite: collection.isFavorite,
+                  itemCount: collection.itemCount,
+                  borderColor: collection.borderColor,
+                }}
+              />
+            </div>
           </div>
         </div>
 

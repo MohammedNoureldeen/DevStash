@@ -6,6 +6,11 @@ export type CreateCollectionData = {
   description?: string | null
 }
 
+export type UpdateCollectionData = {
+  name?: string
+  description?: string | null
+}
+
 export type FavoriteCollection = {
   id: string
   name: string
@@ -184,4 +189,64 @@ export async function getCollectionById(id: string, userId: string): Promise<Col
   }))
 
   return { ...base, items }
+}
+
+export async function updateCollection(
+  id: string,
+  userId: string,
+  data: UpdateCollectionData,
+): Promise<CollectionWithDetails | null> {
+  const col = await prisma.collection.update({
+    where: { id, userId },
+    data: {
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.description !== undefined && { description: data.description }),
+    },
+    include: {
+      items: {
+        include: {
+          item: {
+            include: { itemType: true },
+          },
+        },
+      },
+    },
+  })
+  return mapCollection(col)
+}
+
+export async function deleteCollection(
+  id: string,
+  userId: string,
+): Promise<boolean> {
+  const result = await prisma.collection.deleteMany({
+    where: { id, userId },
+  })
+  return result.count > 0
+}
+
+export async function toggleFavoriteCollection(
+  id: string,
+  userId: string,
+): Promise<CollectionWithDetails | null> {
+  const current = await prisma.collection.findFirst({
+    where: { id, userId },
+    select: { isFavorite: true },
+  })
+  if (!current) return null
+
+  const col = await prisma.collection.update({
+    where: { id },
+    data: { isFavorite: !current.isFavorite },
+    include: {
+      items: {
+        include: {
+          item: {
+            include: { itemType: true },
+          },
+        },
+      },
+    },
+  })
+  return mapCollection(col)
 }
